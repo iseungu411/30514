@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import time
 
 st.set_page_config(page_title="Legendary Hero RPG", layout="centered")
 
@@ -39,6 +40,15 @@ st.markdown("""
         font-size: 3rem;
         margin: 10px 0;
     }
+    .battle-field {
+        background: linear-gradient(180deg, #150022 0%, #080010 100%);
+        border: 2px solid #ff007f;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        font-size: 2.5rem;
+        margin: 15px 0;
+    }
     div.stButton > button {
         width: 100% !important;
         height: 50px !important;
@@ -56,7 +66,7 @@ def safe_rerun():
     else:
         st.experimental_rerun()
 
-# --- 칼 아트 & 단계 ---
+# --- 데이터 정의 ---
 WEAPON_DATA = [
     {"name": "녹슨 단검", "art": "🗡️", "base": 10},
     {"name": "강철 장검", "art": "⚔️", "base": 25},
@@ -65,13 +75,12 @@ WEAPON_DATA = [
     {"name": "신을 찌르는 창", "art": "🔱⚡", "base": 150}
 ]
 
-# --- 몬스터 아트 ---
 MONSTERS = [
-    {"name": "슬라임", "art": "🟢", "hp": 30},
-    {"name": "고블린", "art": "👺", "hp": 60},
-    {"name": "오크 족장", "art": "👹", "hp": 120},
-    {"name": "화염 드래곤", "art": "🐉🔥", "hp": 250},
-    {"name": "심연의 마왕", "art": "👾⚡", "hp": 500}
+    {"name": "슬라임", "art": "🟢", "req_atk": 20, "reward": 300},
+    {"name": "고블린", "art": "👺", "req_atk": 50, "reward": 800},
+    {"name": "오크 족장", "art": "👹", "req_atk": 100, "reward": 2000},
+    {"name": "화염 드래곤", "art": "🐉🔥", "req_atk": 200, "reward": 5000},
+    {"name": "심연의 마왕", "art": "👾⚡", "req_atk": 350, "reward": 12000}
 ]
 
 # --- 게임 초기화 ---
@@ -81,7 +90,7 @@ def init_game():
     st.session_state.gold = 1000
     st.session_state.weapon_lvl = 0
     st.session_state.weapon_tier = 0
-    st.session_state.log = ["⚒️ 전설의 시작! 모험을 준비하세요."]
+    st.session_state.log = ["⚒️ 모험을 시작합니다."]
 
 if "gold" not in st.session_state:
     init_game()
@@ -106,7 +115,7 @@ def get_h_cost():
 def get_w_rate():
     return max(20, 100 - (st.session_state.weapon_lvl * 7))
 
-# --- 행동 로직 ---
+# --- 강화 로직 ---
 def enhance_weapon():
     cost = get_w_cost()
     if st.session_state.gold < cost:
@@ -118,7 +127,7 @@ def enhance_weapon():
         st.session_state.weapon_lvl += 1
         if st.session_state.weapon_lvl % 4 == 0 and st.session_state.weapon_tier < len(WEAPON_DATA) - 1:
             st.session_state.weapon_tier += 1
-            st.toast("🎉 무기가 멋진 형태로 진화했습니다!", icon="✨")
+            st.toast("🎉 무기가 더 강력하게 진화했습니다!", icon="✨")
         st.session_state.log.append(f"⚔️ 무기 강화 성공! (+{st.session_state.weapon_lvl})")
     else:
         st.session_state.weapon_lvl = max(0, st.session_state.weapon_lvl - 1)
@@ -135,13 +144,65 @@ def enhance_hero():
     st.session_state.log.append(f"🦸 {st.session_state.hero_name} 훈련 성공! (Lv.{st.session_state.hero_level})")
     safe_rerun()
 
-def hunt_monster():
+# --- ⚔️ 전투 화면 모달 (대결 애니메이션) ---
+@st.dialog("⚔️ 몬스터 사냥터 ⚔️")
+def start_battle():
     monster = random.choice(MONSTERS)
-    atk = get_total_atk()
-    reward = random.randint(atk * 2, atk * 4)
-    st.session_state.gold += reward
-    st.session_state.log.append(f"⚔️ {monster['art']} [{monster['name']}] 처치! +{reward:,} G")
-    safe_rerun()
+    w_art = WEAPON_DATA[st.session_state.weapon_tier]["art"]
+    total_atk = get_total_atk()
+    
+    st.write(f"### 야생의 **[{monster['name']}]** 이(가) 나타났다!")
+    st.caption(f"권장 공격력: {monster['req_atk']} | 내 공격력: {total_atk}")
+    
+    # 1단계: 대치 상태
+    battle_area = st.empty()
+    battle_area.markdown(f"""
+        <div class='battle-field'>
+            🦸‍♂️{w_art} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {monster['art']}
+        </div>
+    """, unsafe_allow_html=True)
+    
+    msg_area = st.empty()
+    msg_area.info("⚔️ 돌격 준비 중...")
+    time.sleep(1)
+    
+    # 2단계: 공격 애니메이션
+    battle_area.markdown(f"""
+        <div class='battle-field'>
+            &nbsp;&nbsp;&nbsp;&nbsp;🦸‍♂️{w_art}💥{monster['art']}
+        </div>
+    """, unsafe_allow_html=True)
+    msg_area.warning("💥 챙-캉! 격렬하게 전투 중!")
+    time.sleep(1.2)
+    
+    # 승패 판정 (공격력 + 약간의 운)
+    win_chance = min(95, max(10, int((total_atk / monster['req_atk']) * 70)))
+    
+    if random.randint(1, 100) <= win_chance:
+        # 승리 연출
+        battle_area.markdown(f"""
+            <div class='battle-field'>
+                🦸‍♂️{w_art} 👑 &nbsp;&nbsp;&nbsp;&nbsp; 💥💀
+            </div>
+        """, unsafe_allow_html=True)
+        reward = monster['reward'] + random.randint(0, 200)
+        st.session_state.gold += reward
+        st.session_state.log.append(f"🎉 {monster['art']} [{monster['name']}] 퇴치 성공! (+{reward:,} G)")
+        msg_area.success(f"🏆 승리! [{monster['name']}]을 처치하고 {reward:,} 골드를 획득했습니다!")
+    else:
+        # 실패 연출
+        battle_area.markdown(f"""
+            <div class='battle-field'>
+                💥💫🏃‍♂️ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {monster['art']}😈
+            </div>
+        """, unsafe_allow_html=True)
+        penalty = random.randint(100, 300)
+        st.session_state.gold = max(0, st.session_state.gold - penalty)
+        st.session_state.log.append(f"💀 [{monster['name']}] 사냥 실패... (-{penalty:,} G)")
+        msg_area.error(f"☠️ 패배! 몬스터가 너무 강해 도망쳤습니다... (-{penalty:,} G)")
+        
+    if st.button("확인"):
+        safe_rerun()
 
 # --- UI 레이아웃 ---
 st.markdown("<h1 class='main-title'>⚔️ HERO & SWORD RPG ⚔️</h1>", unsafe_allow_html=True)
@@ -149,12 +210,12 @@ st.markdown("<h1 class='main-title'>⚔️ HERO & SWORD RPG ⚔️</h1>", unsafe
 # 히어로 이름 설정
 with st.sidebar:
     st.header("⚙️ 히어로 설정")
-    new_name = st.text_input("히어로 이름 변경", value=st.session_state.hero_name)
+    new_name = st.text_input("히어로 이름", value=st.session_state.hero_name)
     if new_name != st.session_state.hero_name:
         st.session_state.hero_name = new_name
         safe_rerun()
 
-# 상단 상태바
+# 상태바
 c1, c2, c3 = st.columns(3)
 c1.metric("💰 골드", f"{st.session_state.gold:,} G")
 c2.metric("⚔️ 총 공격력", f"{get_total_atk():,} ATK")
@@ -162,9 +223,8 @@ c3.metric("🦸 히어로 레벨", f"Lv.{st.session_state.hero_level}")
 
 st.markdown("---")
 
-# 카드 영역 (히어로 & 칼 디스플레이)
+# 캐릭터 & 무기 정보
 w_info = WEAPON_DATA[st.session_state.weapon_tier]
-
 col_hero, col_weapon = st.columns(2)
 
 with col_hero:
@@ -177,7 +237,7 @@ with col_hero:
             <div style='color:#00f0ff; margin-top:5px;'>훈련 비용: <b>{get_h_cost():,} G</b></div>
         </div>
     """, unsafe_allow_html=True)
-    if st.button("💪 히어로 레벨업 (100% 성공)"):
+    if st.button("💪 히어로 훈련하기"):
         enhance_hero()
 
 with col_weapon:
@@ -195,13 +255,13 @@ with col_weapon:
 
 st.markdown("---")
 
-# 던전 탐험 (몬스터 전투)
+# 사냥 버튼
 st.subheader("👹 던전 탐험")
 if st.button("⚔️ 몬스터 사냥하러 가기!", use_container_width=True):
-    hunt_monster()
+    start_battle()
 
-# 게임 초기화
-if st.button("🔄 게임 처음부터 다시하기"):
+# 초기화
+if st.button("🔄 게임 초기화"):
     init_game()
     safe_rerun()
 
