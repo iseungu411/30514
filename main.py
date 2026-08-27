@@ -1,8 +1,7 @@
 import streamlit as st
 import random
-import time
 
-st.set_page_config(page_title="Legendary Smith RPG", layout="centered")
+st.set_page_config(page_title="Legendary Hero RPG", layout="centered")
 
 # --- 사이버펑크 RPG CSS 스타일 ---
 st.markdown("""
@@ -14,34 +13,38 @@ st.markdown("""
     }
     .main-title {
         text-align: center;
-        font-size: 2.5rem;
+        font-size: 2.3rem;
         font-weight: 800;
         background: linear-gradient(135deg, #ff007f 0%, #7928ca 50%, #00f0ff 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 20px;
     }
-    .weapon-card {
+    .card-box {
         background: rgba(255, 255, 255, 0.05);
         border: 2px solid #00f0ff;
         border-radius: 15px;
-        padding: 20px;
+        padding: 15px;
         text-align: center;
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
-        margin-bottom: 20px;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        margin-bottom: 15px;
     }
-    .weapon-name {
-        font-size: 1.8rem;
+    .card-title {
+        font-size: 1.5rem;
         font-weight: bold;
         color: #ff007f;
-        text-shadow: 0 0 10px #ff007f;
+        text-shadow: 0 0 8px #ff007f;
+    }
+    .art-display {
+        font-size: 3rem;
+        margin: 10px 0;
     }
     div.stButton > button {
         width: 100% !important;
         height: 50px !important;
         border-radius: 10px !important;
         font-weight: bold !important;
-        font-size: 1.1rem !important;
+        font-size: 1rem !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -53,121 +56,156 @@ def safe_rerun():
     else:
         st.experimental_rerun()
 
-# --- 게임 데이터 & 상태 초기화 ---
-WEAPON_NAMES = ["녹슨 단검", "초보자의 검", "강철 장검", "빛나는 성검", "드래곤 슬레이어", "신을 찌르는 창"]
+# --- 칼 아트 & 단계 ---
+WEAPON_DATA = [
+    {"name": "녹슨 단검", "art": "🗡️", "base": 10},
+    {"name": "강철 장검", "art": "⚔️", "base": 25},
+    {"name": "빛나는 성검", "art": "🗡️✨", "base": 50},
+    {"name": "드래곤 슬레이어", "art": "⚔️🔥", "base": 90},
+    {"name": "신을 찌르는 창", "art": "🔱⚡", "base": 150}
+]
 
+# --- 몬스터 아트 ---
+MONSTERS = [
+    {"name": "슬라임", "art": "🟢", "hp": 30},
+    {"name": "고블린", "art": "👺", "hp": 60},
+    {"name": "오크 족장", "art": "👹", "hp": 120},
+    {"name": "화염 드래곤", "art": "🐉🔥", "hp": 250},
+    {"name": "심연의 마왕", "art": "👾⚡", "hp": 500}
+]
+
+# --- 게임 초기화 ---
 def init_game():
+    st.session_state.hero_name = "용사님"
+    st.session_state.hero_level = 1
     st.session_state.gold = 1000
-    st.session_state.enhance_level = 0
-    st.session_state.weapon_idx = 0
-    st.session_state.max_level_reached = 0
-    st.session_state.log = ["⚒️ 대장간에 입장했습니다."]
+    st.session_state.weapon_lvl = 0
+    st.session_state.weapon_tier = 0
+    st.session_state.log = ["⚒️ 전설의 시작! 모험을 준비하세요."]
 
 if "gold" not in st.session_state:
     init_game()
 
-# --- 게임 수치 계산 함수 ---
-def get_weapon_name():
-    idx = min(st.session_state.weapon_idx, len(WEAPON_NAMES) - 1)
-    return f"+{st.session_state.enhance_level} {WEAPON_NAMES[idx]}"
+# --- 수치 계산 ---
+def get_hero_atk():
+    return st.session_state.hero_level * 15
 
 def get_weapon_atk():
-    return (st.session_state.weapon_idx + 1) * 15 + (st.session_state.enhance_level * 12)
+    w = WEAPON_DATA[st.session_state.weapon_tier]
+    return w["base"] + (st.session_state.weapon_lvl * 10)
 
-def get_enhance_cost():
-    return (st.session_state.enhance_level + 1) * 150
+def get_total_atk():
+    return get_hero_atk() + get_weapon_atk()
 
-def get_success_rate():
-    # 강철 단계 이후 확률 하락 (최저 15%)
-    rate = max(15, 100 - (st.session_state.enhance_level * 8))
-    return rate
+def get_w_cost():
+    return (st.session_state.weapon_lvl + 1) * 120
 
-# --- 게임 행동 로직 ---
+def get_h_cost():
+    return st.session_state.hero_level * 150
+
+def get_w_rate():
+    return max(20, 100 - (st.session_state.weapon_lvl * 7))
+
+# --- 행동 로직 ---
 def enhance_weapon():
-    cost = get_enhance_cost()
+    cost = get_w_cost()
     if st.session_state.gold < cost:
         st.toast("⚠️ 골드가 부족합니다!", icon="💰")
         return
-
     st.session_state.gold -= cost
-    rate = get_success_rate()
-    rand = random.randint(1, 100)
 
-    if rand <= rate:
-        st.session_state.enhance_level += 1
-        
-        # 5강마다 무기 외형 승급
-        if st.session_state.enhance_level % 5 == 0 and st.session_state.weapon_idx < len(WEAPON_NAMES) - 1:
-            st.session_state.weapon_idx += 1
-            st.toast("🎉 무기가 더 강력한 외형으로 진화했습니다!", icon="✨")
-            
-        st.session_state.log.append(f"✅ 강화 성공! ({get_weapon_name()})")
-        if st.session_state.enhance_level > st.session_state.max_level_reached:
-            st.session_state.max_level_reached = st.session_state.enhance_level
+    if random.randint(1, 100) <= get_w_rate():
+        st.session_state.weapon_lvl += 1
+        if st.session_state.weapon_lvl % 4 == 0 and st.session_state.weapon_tier < len(WEAPON_DATA) - 1:
+            st.session_state.weapon_tier += 1
+            st.toast("🎉 무기가 멋진 형태로 진화했습니다!", icon="✨")
+        st.session_state.log.append(f"⚔️ 무기 강화 성공! (+{st.session_state.weapon_lvl})")
     else:
-        # 실패 시 처리
-        if st.session_state.enhance_level >= 7:
-            # 7강 이상 실패 시 파괴 방지 (강화 단계만 1 감소)
-            st.session_state.enhance_level = max(0, st.session_state.enhance_level - 1)
-            st.session_state.log.append("💥 강화 실패! 단계가 1 하락했습니다.")
-        else:
-            st.session_state.log.append("❌ 강화 실패!")
-
+        st.session_state.weapon_lvl = max(0, st.session_state.weapon_lvl - 1)
+        st.session_state.log.append("❌ 무기 강화 실패! 단계 하락")
     safe_rerun()
 
-def explore_dungeon():
-    atk = get_weapon_atk()
-    # 공격력 기반 보상 계산
-    gained_gold = random.randint(atk * 2, atk * 4)
-    st.session_state.gold += gained_gold
-    
-    monsters = ["슬라임", "고블린", "오크", "골렘", "드래곤"]
-    monster = random.choice(monsters)
-    
-    st.session_state.log.append(f"⚔️ 던전 탐험 성공! [{monster}]을(를) 처치하고 {gained_gold:,} G 획득!")
+def enhance_hero():
+    cost = get_h_cost()
+    if st.session_state.gold < cost:
+        st.toast("⚠️ 골드가 부족합니다!", icon="💰")
+        return
+    st.session_state.gold -= cost
+    st.session_state.hero_level += 1
+    st.session_state.log.append(f"🦸 {st.session_state.hero_name} 훈련 성공! (Lv.{st.session_state.hero_level})")
+    safe_rerun()
+
+def hunt_monster():
+    monster = random.choice(MONSTERS)
+    atk = get_total_atk()
+    reward = random.randint(atk * 2, atk * 4)
+    st.session_state.gold += reward
+    st.session_state.log.append(f"⚔️ {monster['art']} [{monster['name']}] 처치! +{reward:,} G")
     safe_rerun()
 
 # --- UI 레이아웃 ---
-st.markdown("<h1 class='main-title'>⚔️ LEGENDARY SMITH RPG ⚔️</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>⚔️ HERO & SWORD RPG ⚔️</h1>", unsafe_allow_html=True)
 
-# 상단 유저 상태창
-col1, col2, col3 = st.columns(3)
-col1.metric("💰 보유 골드", f"{st.session_state.gold:,} G")
-col2.metric("⚔️ 공격력", f"{get_weapon_atk():,} ATK")
-col3.metric("🏆 최고 기록", f"+{st.session_state.max_level_reached} 강")
+# 히어로 이름 설정
+with st.sidebar:
+    st.header("⚙️ 히어로 설정")
+    new_name = st.text_input("히어로 이름 변경", value=st.session_state.hero_name)
+    if new_name != st.session_state.hero_name:
+        st.session_state.hero_name = new_name
+        safe_rerun()
+
+# 상단 상태바
+c1, c2, c3 = st.columns(3)
+c1.metric("💰 골드", f"{st.session_state.gold:,} G")
+c2.metric("⚔️ 총 공격력", f"{get_total_atk():,} ATK")
+c3.metric("🦸 히어로 레벨", f"Lv.{st.session_state.hero_level}")
 
 st.markdown("---")
 
-# 무기 디스플레이
-st.markdown(f"""
-    <div class='weapon-card'>
-        <div style='font-size: 0.9rem; color: #a0a0a0;'>CURRENT WEAPON</div>
-        <div class='weapon-name'>{get_weapon_name()}</div>
-        <div style='margin-top: 10px; font-size: 1.1rem; color: #00f0ff;'>
-            강화 성공 확률: <b>{get_success_rate()}%</b> | 비용: <b>{get_enhance_cost():,} G</b>
+# 카드 영역 (히어로 & 칼 디스플레이)
+w_info = WEAPON_DATA[st.session_state.weapon_tier]
+
+col_hero, col_weapon = st.columns(2)
+
+with col_hero:
+    st.markdown(f"""
+        <div class='card-box'>
+            <div style='color:#a0a0a0; font-size:0.9rem;'>MY HERO</div>
+            <div class='art-display'>🦸‍♂️</div>
+            <div class='card-title'>{st.session_state.hero_name}</div>
+            <div>기본 공격력: <b>{get_hero_atk()}</b></div>
+            <div style='color:#00f0ff; margin-top:5px;'>훈련 비용: <b>{get_h_cost():,} G</b></div>
         </div>
-    </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+    if st.button("💪 히어로 레벨업 (100% 성공)"):
+        enhance_hero()
 
-# 조작 버튼
-btn_col1, btn_col2 = st.columns(2)
-
-with btn_col1:
+with col_weapon:
+    st.markdown(f"""
+        <div class='card-box'>
+            <div style='color:#a0a0a0; font-size:0.9rem;'>EQUIPPED WEAPON</div>
+            <div class='art-display'>{w_info['art']}</div>
+            <div class='card-title'>+{st.session_state.weapon_lvl} {w_info['name']}</div>
+            <div>무기 공격력: <b>{get_weapon_atk()}</b></div>
+            <div style='color:#ff007f; margin-top:5px;'>성공률: <b>{get_w_rate()}%</b> | 비용: <b>{get_w_cost():,} G</b></div>
+        </div>
+    """, unsafe_allow_html=True)
     if st.button("🔨 무기 강화하기"):
         enhance_weapon()
 
-with btn_col2:
-    if st.button("🗡️ 던전 탐험하기 (골드 벌기)"):
-        explore_dungeon()
+st.markdown("---")
 
-st.write("")
+# 던전 탐험 (몬스터 전투)
+st.subheader("👹 던전 탐험")
+if st.button("⚔️ 몬스터 사냥하러 가기!", use_container_width=True):
+    hunt_monster()
 
-# 리셋 버튼
-if st.button("🔄 게임 초기화", use_container_width=True):
+# 게임 초기화
+if st.button("🔄 게임 처음부터 다시하기"):
     init_game()
     safe_rerun()
 
-# 로그 화면
-with st.expander("📜 게임 활동 기록", expanded=True):
-    for log in reversed(st.session_state.log[-6:]):
+# 로그
+with st.expander("📜 모험 기록", expanded=True):
+    for log in reversed(st.session_state.log[-5:]):
         st.write(log)
