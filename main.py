@@ -1,8 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# 1. 페이지 설정
-st.set_page_config(page_title="3D Piano Rhythm Game", page_icon="🎮", layout="wide")
+st.set_page_config(page_title="3D Piano Rhythm Game - Stage Challenge", page_icon="🎮", layout="wide")
 
 st.markdown("""
 <style>
@@ -17,12 +16,11 @@ st.markdown("""
     }
 </style>
 <div class="title-container">
-    <h2>🎮 3D 피아노 박자 맞추기 (리듬 게임)</h2>
-    <p>위에서 떨어지는 노트가 판정선(건반)에 맞춰 도착할 때 키보드 또는 건반을 누르세요!</p>
+    <h2>🎮 3D 피아노 박자 맞추기: 단계별 스테이지 도전</h2>
+    <p>노트를 놓치면 HP가 깎입니다! 콤보를 올려 높은 단계(Stage)로 진화하세요.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Three.js 기반 3D 리듬게임 HTML
 rhythm_game_html = """
 <!DOCTYPE html>
 <html>
@@ -30,39 +28,75 @@ rhythm_game_html = """
     <style>
         body { margin: 0; overflow: hidden; background: #050608; font-family: 'Segoe UI', sans-serif; }
         canvas { width: 100vw; height: 100vh; display: block; }
+        
         #ui-layer {
             position: absolute;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 20px;
+            gap: 15px;
             z-index: 10;
             pointer-events: none;
         }
         .hud-card {
             background: rgba(17, 24, 39, 0.85);
             border: 1px solid #3b82f6;
-            padding: 8px 20px;
+            padding: 8px 16px;
             border-radius: 12px;
             color: #fff;
             text-align: center;
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            min-width: 70px;
         }
+        .hud-card.danger { border-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+        .hud-card.stage { border-color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
         .hud-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; }
-        .hud-value { font-size: 20px; font-weight: bold; color: #60a5fa; }
+        .hud-value { font-size: 18px; font-weight: bold; color: #60a5fa; }
+        .hud-card.danger .hud-value { color: #f87171; }
+        .hud-card.stage .hud-value { color: #fbbf24; }
+
         #feedback {
             position: absolute;
-            top: 40%;
+            top: 35%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 42px;
+            font-size: 40px;
             font-weight: 900;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.1s, transform 0.1s;
             text-shadow: 0 0 20px currentColor;
         }
+
+        /* 게임 오버 / 성공 오버레이 */
+        #game-over-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(5, 6, 8, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+        #game-over-screen h1 { font-size: 48px; color: #ef4444; margin-bottom: 10px; text-shadow: 0 0 20px #ef4444; }
+        #game-over-screen p { font-size: 18px; color: #9ca3af; margin-bottom: 20px; }
+        .restart-btn {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+            transition: 0.2s;
+        }
+        .restart-btn:hover { transform: scale(1.05); }
+
         #info {
             position: absolute;
             bottom: 10px;
@@ -80,15 +114,25 @@ rhythm_game_html = """
 <body>
 
 <div id="ui-layer">
+    <div class="hud-card stage"><div class="hud-label">STAGE</div><div id="stage" class="hud-value">1</div></div>
     <div class="hud-card"><div class="hud-label">SCORE</div><div id="score" class="hud-value">0</div></div>
     <div class="hud-card"><div class="hud-label">COMBO</div><div id="combo" class="hud-value">0</div></div>
+    <div class="hud-card danger"><div class="hud-label">HP</div><div id="hp" class="hud-value">5</div></div>
 </div>
 
 <div id="feedback">PERFECT</div>
-<div id="info">⌨️ 입력 키: [A] [S] [D] [F] [G] [H] [J] | 건반 직접 클릭 가능</div>
+
+<!-- 게임 오버 화면 -->
+<div id="game-over-screen">
+    <h1 id="over-title">GAME OVER</h1>
+    <p id="over-desc">HP가 모두 소진되었습니다!</p>
+    <button class="restart-btn" onclick="restartGame()">다시 도전하기 🔄</button>
+</div>
+
+<div id="info">⌨️ 입력 키: [A] [S] [D] [F] [G] [H] [J]</div>
 
 <script>
-    // 1. Web Audio API (사운드 연주)
+    // 1. Web Audio API
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNote(freq) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -104,7 +148,6 @@ rhythm_game_html = """
         osc.stop(audioCtx.currentTime + 0.8);
     }
 
-    // 2. 7개 레인 (도 레 미 파 솔 라 시) 데이터 설정
     const lanes = [
         { name: "C4", freq: 261.63, key: "a", color: 0x3b82f6 },
         { name: "D4", freq: 293.66, key: "s", color: 0x60a5fa },
@@ -115,7 +158,18 @@ rhythm_game_html = """
         { name: "J4", freq: 493.88, key: "j", color: 0x10b981 }
     ];
 
-    // 3. Three.js 씬 구축
+    // 2. 난이도 및 게임 상태 변수
+    let score = 0;
+    let combo = 0;
+    let hp = 5;
+    let stage = 1;
+    let isGameOver = false;
+
+    let noteSpeed = 0.20;       // 이동 속도 (단계별 상승)
+    let spawnInterval = 1000;   // 노트 생성 간격 (단계별 단축)
+    let spawnTimer = null;
+
+    // 3. Three.js 씬 설정
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x050608, 0.025);
 
@@ -132,7 +186,7 @@ rhythm_game_html = """
     pLight.position.set(0, 5, 2);
     scene.add(pLight);
 
-    // 4. 건반(판정선) 메쉬 생성
+    // 건반 및 레인 생성
     const keyObjects = [];
     const laneWidth = 1.1;
     const offset = (lanes.length * laneWidth) / 2 - laneWidth / 2;
@@ -142,11 +196,10 @@ rhythm_game_html = """
         const mat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.3 });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(i * laneWidth - offset, 0, 1.5);
-        mesh.userData = { ...lane, index: i, originalY: 0 };
+        mesh.userData = { ...lane, index: i };
         scene.add(mesh);
         keyObjects.push(mesh);
 
-        // 레인 가이드 라인
         const lineGeo = new THREE.PlaneGeometry(1.0, 30);
         const lineMat = new THREE.MeshBasicMaterial({ color: lane.color, wireframe: true, transparent: true, opacity: 0.15 });
         const line = new THREE.Mesh(lineGeo, lineMat);
@@ -155,7 +208,6 @@ rhythm_game_html = """
         scene.add(line);
     });
 
-    // 판정선 가이드 바
     const hitLine = new THREE.Mesh(
         new THREE.BoxGeometry(lanes.length * laneWidth, 0.05, 0.1),
         new THREE.MeshBasicMaterial({ color: 0xef4444 })
@@ -163,12 +215,12 @@ rhythm_game_html = """
     hitLine.position.set(0, 0.2, 1.5);
     scene.add(hitLine);
 
-    // 5. 노트(생성) 시스템
-    const notes = [];
-    const noteSpeed = 0.22;
-    const targetZ = 1.5; // 판정선 Z 위치
+    // 4. 노트 및 루프 조작
+    let notes = [];
+    const targetZ = 1.5;
 
     function spawnNote() {
+        if (isGameOver) return;
         const laneIdx = Math.floor(Math.random() * lanes.length);
         const lane = lanes[laneIdx];
 
@@ -183,15 +235,31 @@ rhythm_game_html = """
         notes.push(mesh);
     }
 
-    // 1초마다 랜덤 노트 생성
-    setInterval(spawnNote, 800);
+    function startSpawning() {
+        if (spawnTimer) clearInterval(spawnTimer);
+        spawnTimer = setInterval(spawnNote, spawnInterval);
+    }
 
-    // 6. 점수 및 판정 시스템
-    let score = 0;
-    let combo = 0;
+    // 5. 난이도 조절 (단계 상승)
+    function updateStage() {
+        // 점수 기준 stage 상승
+        let newStage = Math.floor(score / 1000) + 1;
+        if (newStage !== stage && newStage <= 10) {
+            stage = newStage;
+            document.getElementById('stage').innerText = stage;
+            
+            // 단계가 오를수록 더 빨라지고 촘촘하게 생성
+            noteSpeed = 0.20 + (stage - 1) * 0.04;
+            spawnInterval = Math.max(350, 1000 - (stage - 1) * 80);
+            
+            showFeedback("STAGE " + stage + "!", "#f59e0b");
+            startSpawning();
+        }
+    }
 
     const scoreEl = document.getElementById('score');
     const comboEl = document.getElementById('combo');
+    const hpEl = document.getElementById('hp');
     const feedbackEl = document.getElementById('feedback');
 
     function showFeedback(text, color) {
@@ -203,13 +271,13 @@ rhythm_game_html = """
         setTimeout(() => {
             feedbackEl.style.opacity = '0';
             feedbackEl.style.transform = 'translate(-50%, -50%) scale(1.0)';
-        }, 200);
+        }, 220);
     }
 
     function checkHit(laneIdx) {
+        if (isGameOver) return;
         const keyMesh = keyObjects[laneIdx];
         
-        // 건반 누름 애니메이션 및 소리
         playNote(keyMesh.userData.freq);
         keyMesh.position.y = -0.15;
         keyMesh.material.color.setHex(keyMesh.userData.color);
@@ -218,14 +286,13 @@ rhythm_game_html = """
             keyMesh.material.color.setHex(0x1f2937);
         }, 120);
 
-        // 노트 판정 확인 (판정선 근처의 노트 탐색)
         let hitFound = false;
         for (let i = 0; i < notes.length; i++) {
             const note = notes[i];
             if (note.userData.laneIndex === laneIdx && !note.userData.hit) {
                 const dist = Math.abs(note.position.z - targetZ);
                 
-                if (dist < 1.2) { // 판정 범위 안
+                if (dist < 1.3) {
                     hitFound = true;
                     note.userData.hit = true;
                     scene.remove(note);
@@ -246,18 +313,61 @@ rhythm_game_html = """
                     
                     scoreEl.innerText = score;
                     comboEl.innerText = combo;
+                    updateStage();
                     break;
                 }
             }
         }
 
+        // 헛스윙(잘못 누름)
         if (!hitFound) {
             combo = 0;
             comboEl.innerText = combo;
         }
     }
 
-    // 7. 입력 이벤트 (키보드 & 마우스)
+    function triggerMiss() {
+        combo = 0;
+        hp--;
+        comboEl.innerText = combo;
+        hpEl.innerText = hp;
+        showFeedback("MISS", "#ef4444");
+
+        if (hp <= 0) {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        isGameOver = true;
+        clearInterval(spawnTimer);
+        document.getElementById('game-over-screen').style.display = 'flex';
+        document.getElementById('over-desc').innerText = "최종 점수: " + score + "점 | 달성 단계: Stage " + stage;
+    }
+
+    window.restartGame = function() {
+        // 기존 노트 제거
+        notes.forEach(n => scene.remove(n));
+        notes = [];
+        
+        score = 0;
+        combo = 0;
+        hp = 5;
+        stage = 1;
+        noteSpeed = 0.20;
+        spawnInterval = 1000;
+        isGameOver = false;
+
+        scoreEl.innerText = score;
+        comboEl.innerText = combo;
+        hpEl.innerText = hp;
+        document.getElementById('stage').innerText = stage;
+        document.getElementById('game-over-screen').style.display = 'none';
+
+        startSpawning();
+    }
+
+    // 입력 처리
     window.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
         const laneIdx = lanes.findIndex(l => l.key === key);
@@ -276,27 +386,27 @@ rhythm_game_html = """
         }
     });
 
-    // 8. 게임 루프
+    // 6. 메인 애니메이션 루프
     function animate() {
         requestAnimationFrame(animate);
 
-        // 노트 이동 및 MISS 처리
-        for (let i = notes.length - 1; i >= 0; i--) {
-            const note = notes[i];
-            note.position.z += noteSpeed;
+        if (!isGameOver) {
+            for (let i = notes.length - 1; i >= 0; i--) {
+                const note = notes[i];
+                note.position.z += noteSpeed;
 
-            // 판정선을 지나쳐 흘러간 경우
-            if (note.position.z > targetZ + 1.5 && !note.userData.hit) {
-                scene.remove(note);
-                notes.splice(i, 1);
-                combo = 0;
-                comboEl.innerText = combo;
-                showFeedback("MISS", "#ef4444");
+                if (note.position.z > targetZ + 1.5 && !note.userData.hit) {
+                    scene.remove(note);
+                    notes.splice(i, 1);
+                    triggerMiss();
+                }
             }
         }
 
         renderer.render(scene, camera);
     }
+
+    startSpawning();
     animate();
 </script>
 </body>
