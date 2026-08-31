@@ -2,231 +2,299 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # 1. 페이지 설정
-st.set_page_config(page_title="3D Grand Piano (37 Keys)", page_icon="🎹", layout="wide")
+st.set_page_config(page_title="3D Piano Rhythm Game", page_icon="🎮", layout="wide")
 
-# 커스텀 CSS
 st.markdown("""
 <style>
-    .stApp { background-color: #0b0c10; color: #ffffff; }
+    .stApp { background-color: #050608; color: #ffffff; }
     .title-container {
         text-align: center;
-        padding: 12px;
-        background: linear-gradient(135deg, #1f2833, #0b0c10);
+        padding: 10px;
+        background: linear-gradient(135deg, #111827, #050608);
         border-radius: 12px;
-        border: 1px solid #45a29e;
-        margin-bottom: 15px;
+        border: 1px solid #3b82f6;
+        margin-bottom: 10px;
     }
 </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
 <div class="title-container">
-    <h2>🎹 3D 풀레인지 그랜드 피아노 (3옥타브 / 37건반)</h2>
-    <p>마우스 드래그로 3D 시점을 회전하고, 넓어진 건반을 마우스/키보드로 연주해보세요!</p>
+    <h2>🎮 3D 피아노 박자 맞추기 (리듬 게임)</h2>
+    <p>위에서 떨어지는 노트가 판정선(건반)에 맞춰 도착할 때 키보드 또는 건반을 누르세요!</p>
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Three.js + 3옥타브 Web Audio API 연동 코드
-piano_html = """
+# 2. Three.js 기반 3D 리듬게임 HTML
+rhythm_game_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { margin: 0; overflow: hidden; background: #0b0c10; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #050608; font-family: 'Segoe UI', sans-serif; }
         canvas { width: 100vw; height: 100vh; display: block; }
-        #controls {
+        #ui-layer {
             position: absolute;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 20px;
             z-index: 10;
+            pointer-events: none;
         }
-        .btn {
-            background: #1f2833;
-            color: #66fcf1;
-            border: 1px solid #45a29e;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+        .hud-card {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid #3b82f6;
+            padding: 8px 20px;
+            border-radius: 12px;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
-        .btn:hover { background: #45a29e; color: #0b0c10; }
+        .hud-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; }
+        .hud-value { font-size: 20px; font-weight: bold; color: #60a5fa; }
+        #feedback {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 42px;
+            font-weight: 900;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s, transform 0.1s;
+            text-shadow: 0 0 20px currentColor;
+        }
         #info {
             position: absolute;
-            bottom: 15px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            color: #c5c6c7;
-            font-size: 13px;
-            background: rgba(0,0,0,0.7);
-            padding: 6px 16px;
-            border-radius: 20px;
-            pointer-events: none;
+            color: #9ca3af;
+            font-size: 12px;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 12px;
+            border-radius: 10px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
-<div id="controls">
-    <button class="btn" onclick="moveCamera(-8)">◀ 저음역대 (C3)</button>
-    <button class="btn" onclick="moveCamera(0)">Mid 중앙 (C4)</button>
-    <button class="btn" onclick="moveCamera(8)">고음역대 (C5) ▶</button>
+<div id="ui-layer">
+    <div class="hud-card"><div class="hud-label">SCORE</div><div id="score" class="hud-value">0</div></div>
+    <div class="hud-card"><div class="hud-label">COMBO</div><div id="combo" class="hud-value">0</div></div>
 </div>
 
-<div id="info">🖱️ 마우스 드래그: 카메라 회전 / 클릭: 연주 | ⌨️ 중앙 옥타브 키보드: [A, W, S, E, D, F, T, G, Y, H, U, J, K]</div>
+<div id="feedback">PERFECT</div>
+<div id="info">⌨️ 입력 키: [A] [S] [D] [F] [G] [H] [J] | 건반 직접 클릭 가능</div>
 
 <script>
-    // 1. Web Audio API 사운드 생성기
+    // 1. Web Audio API (사운드 연주)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playSound(freq) {
+    function playNote(freq) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        
-        gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.4);
-        
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        
         osc.start();
-        osc.stop(audioCtx.currentTime + 1.4);
+        osc.stop(audioCtx.currentTime + 0.8);
     }
 
-    // 2. 3옥타브 (C3 ~ C6) 주파수 데이터 자동 생성 (37개 건반)
-    const baseKeys = [
-        { note: "C", isBlack: false, k: "a" }, { note: "C#", isBlack: true, k: "w" },
-        { note: "D", isBlack: false, k: "s" }, { note: "D#", isBlack: true, k: "e" },
-        { note: "E", isBlack: false, k: "d" }, { note: "F", isBlack: false, k: "f" },
-        { note: "F#", isBlack: true, k: "t" }, { note: "G", isBlack: false, k: "g" },
-        { note: "G#", isBlack: true, k: "y" }, { note: "A", isBlack: false, k: "h" },
-        { note: "A#", isBlack: true, k: "u" }, { note: "B", isBlack: false, k: "j" }
+    // 2. 7개 레인 (도 레 미 파 솔 라 시) 데이터 설정
+    const lanes = [
+        { name: "C4", freq: 261.63, key: "a", color: 0x3b82f6 },
+        { name: "D4", freq: 293.66, key: "s", color: 0x60a5fa },
+        { name: "E4", freq: 329.63, key: "d", color: 0x93c5fd },
+        { name: "F4", freq: 349.23, key: "f", color: 0xf59e0b },
+        { name: "G4", freq: 392.00, key: "g", color: 0xfbbf24 },
+        { name: "H4", freq: 440.00, key: "h", color: 0xfde047 },
+        { name: "J4", freq: 493.88, key: "j", color: 0x10b981 }
     ];
 
-    const notes = [];
-    // 옥타브 3, 4, 5 생성
-    [3, 4, 5].forEach((oct) => {
-        baseKeys.forEach((item) => {
-            // MIDI 노트 번호 기반 주파수 계산
-            const noteIndex = baseKeys.indexOf(item);
-            const midi = (oct + 1) * 12 + noteIndex;
-            const freq = 440 * Math.pow(2, (midi - 69) / 12);
-            notes.push({
-                name: item.note + oct,
-                freq: freq,
-                isBlack: item.isBlack,
-                key: oct === 4 ? item.k : null // 키보드는 C4 옥타브에 매핑
-            });
-        });
-    });
-    // 마지막 C6 추가
-    notes.push({ name: "C6", freq: 1046.50, isBlack: false, key: "k" });
-
-    // 3. Three.js 씬 & OrbitControls 카메라
+    // 3. Three.js 씬 구축
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0b0c10, 0.02);
+    scene.fog = new THREE.FogExp2(0x050608, 0.025);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 11, 14);
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 7, 9);
+    camera.lookAt(0, 0, -2);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.maxPolarAngle = Math.PI / 2.2; // 바닥 아래로 안 내려가게 제한
-
-    // 조명
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const pLight = new THREE.PointLight(0x66fcf1, 2, 30);
-    pLight.position.set(0, 10, 5);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const pLight = new THREE.PointLight(0x3b82f6, 2, 20);
+    pLight.position.set(0, 5, 2);
     scene.add(pLight);
 
-    // 4. 37개 건반 메쉬 생성
+    // 4. 건반(판정선) 메쉬 생성
     const keyObjects = [];
-    let whiteIndex = 0;
-    const totalWhiteKeys = 22; // 3옥타브 전체 흰건반 수
-    const offset = (totalWhiteKeys * 0.9) / 2;
+    const laneWidth = 1.1;
+    const offset = (lanes.length * laneWidth) / 2 - laneWidth / 2;
 
-    notes.forEach((note) => {
-        let mesh;
-        if (!note.isBlack) {
-            const geo = new THREE.BoxGeometry(0.82, 0.6, 4.5);
-            const mat = new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.2 });
-            mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(whiteIndex * 0.88 - offset, 0, 0);
-            whiteIndex++;
-        } else {
-            const geo = new THREE.BoxGeometry(0.48, 0.65, 2.7);
-            const mat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 });
-            mesh = new THREE.Mesh(geo, mat);
-            const posX = (whiteIndex - 1) * 0.88 - offset + 0.44;
-            mesh.position.set(posX, 0.3, -0.9);
-        }
-
-        mesh.userData = { ...note, originalY: mesh.position.y };
+    lanes.forEach((lane, i) => {
+        const geo = new THREE.BoxGeometry(1.0, 0.4, 2.5);
+        const mat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.3 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(i * laneWidth - offset, 0, 1.5);
+        mesh.userData = { ...lane, index: i, originalY: 0 };
         scene.add(mesh);
         keyObjects.push(mesh);
+
+        // 레인 가이드 라인
+        const lineGeo = new THREE.PlaneGeometry(1.0, 30);
+        const lineMat = new THREE.MeshBasicMaterial({ color: lane.color, wireframe: true, transparent: true, opacity: 0.15 });
+        const line = new THREE.Mesh(lineGeo, lineMat);
+        line.rotation.x = -Math.PI / 2;
+        line.position.set(i * laneWidth - offset, -0.2, -12);
+        scene.add(line);
     });
 
-    // 5. 건반 연동 함수
-    function pressKey(keyMesh) {
-        if (!keyMesh) return;
-        playSound(keyMesh.userData.freq);
+    // 판정선 가이드 바
+    const hitLine = new THREE.Mesh(
+        new THREE.BoxGeometry(lanes.length * laneWidth, 0.05, 0.1),
+        new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    hitLine.position.set(0, 0.2, 1.5);
+    scene.add(hitLine);
 
-        keyMesh.position.y = keyMesh.userData.originalY - 0.15;
-        keyMesh.rotation.x = 0.04;
-        keyMesh.material.color.setHex(0x66fcf1);
+    // 5. 노트(생성) 시스템
+    const notes = [];
+    const noteSpeed = 0.22;
+    const targetZ = 1.5; // 판정선 Z 위치
 
-        setTimeout(() => {
-            keyMesh.position.y = keyMesh.userData.originalY;
-            keyMesh.rotation.x = 0;
-            keyMesh.material.color.setHex(keyMesh.userData.isBlack ? 0x111111 : 0xf0f0f0);
-        }, 160);
+    function spawnNote() {
+        const laneIdx = Math.floor(Math.random() * lanes.length);
+        const lane = lanes[laneIdx];
+
+        const geo = new THREE.BoxGeometry(0.9, 0.3, 0.8);
+        const mat = new THREE.MeshStandardMaterial({ color: lane.color, emissive: lane.color, emissiveIntensity: 0.4 });
+        const mesh = new THREE.Mesh(geo, mat);
+        
+        mesh.position.set(laneIdx * laneWidth - offset, 0.2, -20);
+        mesh.userData = { laneIndex: laneIdx, hit: false };
+
+        scene.add(mesh);
+        notes.push(mesh);
     }
 
-    // 마우스 클릭
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    // 1초마다 랜덤 노트 생성
+    setInterval(spawnNote, 800);
 
-    window.addEventListener('pointerdown', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    // 6. 점수 및 판정 시스템
+    let score = 0;
+    let combo = 0;
 
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(keyObjects);
-        if (intersects.length > 0) pressKey(intersects[0].object);
-    });
+    const scoreEl = document.getElementById('score');
+    const comboEl = document.getElementById('combo');
+    const feedbackEl = document.getElementById('feedback');
 
-    // 키보드 입력
+    function showFeedback(text, color) {
+        feedbackEl.innerText = text;
+        feedbackEl.style.color = color;
+        feedbackEl.style.opacity = '1';
+        feedbackEl.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        
+        setTimeout(() => {
+            feedbackEl.style.opacity = '0';
+            feedbackEl.style.transform = 'translate(-50%, -50%) scale(1.0)';
+        }, 200);
+    }
+
+    function checkHit(laneIdx) {
+        const keyMesh = keyObjects[laneIdx];
+        
+        // 건반 누름 애니메이션 및 소리
+        playNote(keyMesh.userData.freq);
+        keyMesh.position.y = -0.15;
+        keyMesh.material.color.setHex(keyMesh.userData.color);
+        setTimeout(() => {
+            keyMesh.position.y = 0;
+            keyMesh.material.color.setHex(0x1f2937);
+        }, 120);
+
+        // 노트 판정 확인 (판정선 근처의 노트 탐색)
+        let hitFound = false;
+        for (let i = 0; i < notes.length; i++) {
+            const note = notes[i];
+            if (note.userData.laneIndex === laneIdx && !note.userData.hit) {
+                const dist = Math.abs(note.position.z - targetZ);
+                
+                if (dist < 1.2) { // 판정 범위 안
+                    hitFound = true;
+                    note.userData.hit = true;
+                    scene.remove(note);
+                    
+                    if (dist < 0.4) {
+                        score += 300;
+                        combo++;
+                        showFeedback("PERFECT!", "#60a5fa");
+                    } else if (dist < 0.8) {
+                        score += 150;
+                        combo++;
+                        showFeedback("GREAT", "#fbbf24");
+                    } else {
+                        score += 50;
+                        combo = 0;
+                        showFeedback("GOOD", "#34d399");
+                    }
+                    
+                    scoreEl.innerText = score;
+                    comboEl.innerText = combo;
+                    break;
+                }
+            }
+        }
+
+        if (!hitFound) {
+            combo = 0;
+            comboEl.innerText = combo;
+        }
+    }
+
+    // 7. 입력 이벤트 (키보드 & 마우스)
     window.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
-        const target = keyObjects.find(m => m.userData.key === key);
-        if (target) pressKey(target);
+        const laneIdx = lanes.findIndex(l => l.key === key);
+        if (laneIdx !== -1) checkHit(laneIdx);
     });
 
-    // 카메라 시점 이동 버튼
-    window.moveCamera = function(xPos) {
-        controls.target.set(xPos, 0, 0);
-        camera.position.set(xPos, 11, 14);
-    };
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    window.addEventListener('pointerdown', (e) => {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(keyObjects);
+        if (intersects.length > 0) {
+            checkHit(intersects[0].object.userData.index);
+        }
+    });
 
-    // 루프
+    // 8. 게임 루프
     function animate() {
         requestAnimationFrame(animate);
-        controls.update();
+
+        // 노트 이동 및 MISS 처리
+        for (let i = notes.length - 1; i >= 0; i--) {
+            const note = notes[i];
+            note.position.z += noteSpeed;
+
+            // 판정선을 지나쳐 흘러간 경우
+            if (note.position.z > targetZ + 1.5 && !note.userData.hit) {
+                scene.remove(note);
+                notes.splice(i, 1);
+                combo = 0;
+                comboEl.innerText = combo;
+                showFeedback("MISS", "#ef4444");
+            }
+        }
+
         renderer.render(scene, camera);
     }
     animate();
@@ -235,5 +303,4 @@ piano_html = """
 </html>
 """
 
-# 3D 피아노 렌더링
-components.html(piano_html, height=560)
+components.html(rhythm_game_html, height=580)
