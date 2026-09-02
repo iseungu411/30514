@@ -6,13 +6,13 @@ st.set_page_config(page_title="TJ PERFECT SCORE ULTIMATE MAX", page_icon="🎤",
 
 # 세션 상태 초기화
 if "coins" not in st.session_state:
-    st.session_state.coins = 5
+    st.session_state.coins = 10
 if "queue" not in st.session_state:
     st.session_state.queue = []
 if "current_song" not in st.session_state:
     st.session_state.current_song = None
 
-# 최고 퀄리티 악보 및 가사 데이터베이스
+# 최고의 노래방 데이터베이스
 SONG_DATABASE = {
     "🐻 [동요] 곰 세 마리 (TJ 1001)": {
         "tj_num": "1001",
@@ -46,40 +46,40 @@ SONG_DATABASE = {
 
 st.markdown("""
 <style>
-    .stApp { background-color: #02010a; color: #ffffff; }
+    .stApp { background-color: #020108; color: #ffffff; }
     .coin-badge {
-        background: linear-gradient(135deg, #10b981, #047857);
-        padding: 16px; border-radius: 14px; text-align: center;
-        font-weight: 800; font-size: 22px; color: #fff;
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        background: linear-gradient(135deg, #ec4899, #8b5cf6);
+        padding: 16px; border-radius: 16px; text-align: center;
+        font-weight: 900; font-size: 24px; color: #fff;
+        box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
     }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("👑 TJ PERFECT SCORE ULTIMATE KARAOKE MAX 🪙")
-st.caption("수행평가 최종 시연용 코인노래방 알바 & 퍼펙트스코어 오디오 엔진 시뮬레이터")
+st.title("💖 ✨ TJ PERFECT SCORE ULTIMATE DREAM KARAOKE ✨ 💖")
+st.caption("수행평가 만점 시연용 프리미엄 코인노래방 알바 & 퍼펙트스코어 시뮬레이터")
 
 col_left, col_right = st.columns([1.1, 2])
 
-# 1. 알바센터 & 예약 시스템
+# 1. 알바 및 예약 시스템
 with col_left:
     st.subheader("💰 코인노래방 알바센터")
-    st.markdown(f'<div class="coin-badge">보유 코인: {st.session_state.coins} 코인</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="coin-badge">✨ 보유 코인: {st.session_state.coins} 코인 ✨</div>', unsafe_allow_html=True)
     st.write("")
     
-    t1, t2, t3 = st.tabs(["🧹 방 청소", "🥤 음료 채우기", "🛎️ 카운터 계산"])
+    t1, t2, t3 = st.tabs(["🧹 미러볼/방 청소", "🥤 음료 냉장고 정렬", "🛎️ 카운터 잔돈 계산"])
     
     with t1:
-        st.write("**3번 방 마이크 소독 및 테이블 닦기**")
+        st.write("**3번 방 마이크 소독 및 VIP 미러볼 청소**")
         if st.button("🧹 방 청소 완료 (+1코인)", use_container_width=True):
-            with st.spinner("소독제 뿌리는 중..."):
+            with st.spinner("미러볼 닦는 중... ✨"):
                 time.sleep(0.3)
             st.session_state.coins += 1
             st.success("1코인 획득!")
             st.rerun()
 
     with t2:
-        st.write("**냉장고 음료 정렬하기**")
+        st.write("**음료 냉장고 정렬하기**")
         drink = st.selectbox("선택", ["식혜", "이온음료", "탄산수"])
         if st.button("🥤 정렬 완료 (+1코인)", use_container_width=True):
             st.session_state.coins += 1
@@ -126,7 +126,7 @@ with col_left:
     else:
         st.caption("예약된 곡이 없습니다.")
 
-# 2. 퍼펙트 스코어 2D 엔진 메인 화면
+# 2. 퍼펙트 스코어 메인 무대
 with col_right:
     st.subheader("📺 TJ 퍼펙트스코어 가창 모니터")
 
@@ -144,46 +144,58 @@ with col_right:
         <head>
             <style>
                 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-                body {{ background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }}
+                body {{ background: #000; color: #fff; font-family: 'Malgun Gothic', sans-serif; overflow: hidden; }}
                 #stage {{
-                    position: relative; width: 100%; height: 300px;
-                    background: radial-gradient(circle at center, #1e1b4b 0%, #030014 100%);
-                    border: 3px solid #ec4899; border-radius: 14px; overflow: hidden;
-                    box-shadow: 0 0 25px rgba(236, 72, 153, 0.4);
+                    position: relative; width: 100%; height: 320px;
+                    background: radial-gradient(circle at center, #2e1065 0%, #030014 100%);
+                    border: 3px solid #ec4899; border-radius: 16px; overflow: hidden;
+                    box-shadow: 0 0 30px rgba(236, 72, 153, 0.6), inset 0 0 15px rgba(168, 85, 247, 0.4);
                 }}
                 canvas {{ width: 100%; height: 100%; display: block; }}
                 #hud {{
                     position: absolute; top: 12px; right: 15px;
-                    background: rgba(15, 23, 42, 0.9); padding: 8px 16px;
-                    border-radius: 10px; border: 1px solid #38bdf8; text-align: right;
+                    background: rgba(15, 23, 42, 0.85); padding: 8px 16px;
+                    border-radius: 12px; border: 1px solid #38bdf8; text-align: right;
+                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
                 }}
                 .val {{ font-size: 20px; font-weight: 900; color: #38bdf8; }}
                 #judge-box {{
                     position: absolute; top: 15px; left: 20px;
-                    font-size: 36px; font-weight: 900; color: #facc15;
-                    text-shadow: 0 0 20px #facc15;
+                    font-size: 38px; font-weight: 900; color: #facc15;
+                    text-shadow: 0 0 20px #facc15, 0 0 30px #f59e0b;
                 }}
                 #combo-box {{
-                    position: absolute; top: 60px; left: 20px;
-                    font-size: 20px; font-weight: bold; color: #f43f5e;
+                    position: absolute; top: 62px; left: 20px;
+                    font-size: 22px; font-weight: bold; color: #f43f5e;
+                    text-shadow: 0 0 10px #f43f5e;
                 }}
                 #lyrics-box {{
                     position: absolute; bottom: 10px; width: 100%; text-align: center;
-                    font-size: 24px; font-weight: 900; color: #38bdf8;
-                    text-shadow: 0 0 12px #0284c7; background: rgba(0,0,0,0.6); padding: 6px 0;
+                    font-size: 26px; font-weight: 900; color: #38bdf8;
+                    text-shadow: 0 0 15px #0284c7, 0 0 25px #38bdf8;
+                    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 8px 0;
+                }}
+                #result-overlay {{
+                    position: absolute; top:0; left:0; width:100%; height:100%;
+                    background: rgba(0,0,0,0.85); display: none; flex-direction: column;
+                    justify-content: center; align-items: center; z-index: 10;
+                }}
+                #result-score {{
+                    font-size: 60px; font-weight: 900; color: #facc15;
+                    text-shadow: 0 0 30px #facc15, 0 0 50px #f59e0b;
                 }}
                 .controls {{
-                    background: #0d0826; padding: 12px; border-radius: 10px;
+                    background: #0d0826; padding: 12px; border-radius: 12px;
                     border: 1px solid #6366f1; margin-top: 10px; text-align: center;
                     display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
                 }}
                 button {{
-                    background: linear-gradient(135deg, #38bdf8, #0284c7);
-                    color: #fff; border: none; padding: 10px 20px;
+                    background: linear-gradient(135deg, #ec4899, #a855f7);
+                    color: #fff; border: none; padding: 10px 18px;
                     font-weight: bold; font-size: 15px; border-radius: 8px; cursor: pointer;
-                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+                    box-shadow: 0 0 12px rgba(236, 72, 153, 0.5);
                 }}
-                button.fx-btn {{ background: linear-gradient(135deg, #a855f7, #7e22ce); }}
+                button.remote-btn {{ background: linear-gradient(135deg, #38bdf8, #0284c7); }}
             </style>
         </head>
         <body>
@@ -195,13 +207,23 @@ with col_right:
                     <div>🎯 SCORE: <span id="score-val" class="val" style="color:#ec4899;">100.0</span></div>
                 </div>
                 <canvas id="tjCanvas"></canvas>
-                <div id="lyrics-box">🎤 [반주 시작] 버튼을 클릭하세요</div>
+                <div id="lyrics-box">🎤 [▶️ 반주 시작] 버튼을 누르세요</div>
+
+                <div id="result-overlay">
+                    <div style="font-size:28px; color:#38bdf8; font-weight:bold;">🎉 가창 완료! 점수 발표 🎉</div>
+                    <div id="result-score">100 점</div>
+                    <div style="font-size:20px; color:#4ade80; margin-top:10px;">🏆 완벽한 퍼펙트 스코어입니다! 🏆</div>
+                </div>
             </div>
 
             <div class="controls">
-                <button id="start-btn" onclick="startMR()">▶️ 리얼 다채널 MR 시작</button>
-                <button id="ai-sing-btn" onclick="toggleAISing()">🤖 AI 가창 시연 (마이크 테스트)</button>
-                <button class="fx-btn" onclick="playApplause()">👏 환호 박수</button>
+                <button id="start-btn" onclick="startMR()">▶️ 반주 시작</button>
+                <button id="ai-sing-btn" onclick="toggleAISing()">🤖 AI 보컬 시연</button>
+                <button class="remote-btn" onclick="changeKey(1)">🎼 Key +1</button>
+                <button class="remote-btn" onclick="changeKey(-1)">🎼 Key -1</button>
+                <button class="remote-btn" onclick="playApplause()">👏 박수/환호</button>
+                <button class="remote-btn" onclick="playFanfare()">🎉 팡파레</button>
+                <button style="background:#ef4444;" onclick="finishSong()">🏁 점수 발표</button>
             </div>
 
             <script>
@@ -213,7 +235,8 @@ with col_right:
                 const notes = {song['notes']};
                 const lyrics = {song['lyrics']};
                 const chords = {song['chords']};
-                const bpm = {song['bpm']};
+                let bpm = {song['bpm']};
+                let keyOffset = 0;
 
                 let audioCtx, analyser, isPlaying = false, aiSinging = false;
                 let userPitch = 0, score = 100.0, combo = 0, scanX = 0;
@@ -236,26 +259,63 @@ with col_right:
                     playMultiChannelMREngine();
                 }}
 
+                function changeKey(delta) {{
+                    keyOffset += delta;
+                    playFanfare();
+                }}
+
                 function toggleAISing() {{
                     aiSinging = !aiSinging;
                     const btn = document.getElementById('ai-sing-btn');
-                    btn.innerText = aiSinging ? "🤖 AI 가창 중지" : "🤖 AI 가창 시연 (마이크 테스트)";
-                    btn.style.background = aiSinging ? "linear-gradient(135deg, #ef4444, #b91c1c)" : "linear-gradient(135deg, #38bdf8, #0284c7)";
+                    btn.innerText = aiSinging ? "🤖 AI 가창 중지" : "🤖 AI 보컬 시연";
+                    btn.style.background = aiSinging ? "linear-gradient(135deg, #ef4444, #b91c1c)" : "linear-gradient(135deg, #ec4899, #a855f7)";
                 }}
 
                 function playApplause() {{
                     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    for(let i=0; i<15; i++) {{
+                    for(let i=0; i<20; i++) {{
                         setTimeout(() => {{
                             let osc = audioCtx.createOscillator();
                             let gain = audioCtx.createGain();
                             osc.type = 'sine';
-                            osc.frequency.setValueAtTime(400 + Math.random()*800, audioCtx.currentTime);
+                            osc.frequency.setValueAtTime(400 + Math.random()*900, audioCtx.currentTime);
                             gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
                             osc.connect(gain); gain.connect(audioCtx.destination);
-                            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-                        }}, i * 40);
+                            osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+                        }}, i * 35);
+                    }}
+                }}
+
+                function playFanfare() {{
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const scale = [523, 659, 783, 1046];
+                    scale.forEach((freq, idx) => {{
+                        setTimeout(() => {{
+                            let osc = audioCtx.createOscillator();
+                            let gain = audioCtx.createGain();
+                            osc.type = 'triangle';
+                            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                            osc.connect(gain); gain.connect(audioCtx.destination);
+                            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                        }}, idx * 100);
+                    }});
+                }}
+
+                function finishSong() {{
+                    document.getElementById('result-overlay').style.display = 'flex';
+                    document.getElementById('result-score').innerText = Math.round(score) + " 점";
+                    playFanfare();
+                    playApplause();
+                    for(let i=0; i<80; i++) {{
+                        particles.push({{
+                            x: canvas.width / 2, y: canvas.height / 2,
+                            vx: (Math.random() - 0.5) * 12,
+                            vy: (Math.random() - 0.5) * 12,
+                            life: 2.0, color: ["#facc15", "#ec4899", "#38bdf8", "#4ade80"][Math.floor(Math.random()*4)]
+                        }});
                     }}
                 }}
 
@@ -264,8 +324,8 @@ with col_right:
                     const time = audioCtx.currentTime;
                     const interval = (60 / bpm) * 1000;
 
-                    const melFreq = notes[noteIdx % notes.length];
-                    const chordFreq = chords[noteIdx % chords.length] / 2;
+                    const melFreq = notes[noteIdx % notes.length] * Math.pow(2, keyOffset / 12);
+                    const chordFreq = (chords[noteIdx % chords.length] / 2) * Math.pow(2, keyOffset / 12);
 
                     // Lead Melody
                     let melOsc = audioCtx.createOscillator();
@@ -277,7 +337,7 @@ with col_right:
                     melOsc.connect(melGain); melGain.connect(audioCtx.destination);
                     melOsc.start(time); melOsc.stop(time + 0.35);
 
-                    // AI가 가창 시연 중일 때의 오디오
+                    // AI 보컬
                     if (aiSinging) {{
                         let aiOsc = audioCtx.createOscillator();
                         let aiGain = audioCtx.createGain();
@@ -312,12 +372,16 @@ with col_right:
                     document.getElementById('lyrics-box').innerText = lyrics[noteIdx % lyrics.length];
 
                     noteIdx++;
-                    setTimeout(playMultiChannelMREngine, interval);
+                    if (noteIdx >= notes.length * 2) {{
+                        finishSong();
+                    }} else {{
+                        setTimeout(playMultiChannelMREngine, interval);
+                    }}
                 }}
 
                 function detectMicPitch() {{
                     if (aiSinging) {{
-                        let currentTargetFreq = notes[(noteIdx - 1 + notes.length) % notes.length];
+                        let currentTargetFreq = notes[(noteIdx - 1 + notes.length) % notes.length] * Math.pow(2, keyOffset / 12);
                         return currentTargetFreq;
                     }}
                     if (!analyser) return 0;
@@ -329,122 +393,4 @@ with col_right:
                     return rms > 0.015 ? rms * 1500 : 0;
                 }}
 
-                function createExplosion(x, y) {{
-                    for(let i=0; i<5; i++) {{
-                        particles.push({{
-                            x: x, y: y,
-                            vx: (Math.random() - 0.5) * 4,
-                            vy: (Math.random() - 0.5) * 4,
-                            life: 1.0, color: "#34d399"
-                        }});
-                    }}
-                }}
-
-                function drawTJScores() {{
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // 가이드라인
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-                    ctx.lineWidth = 1;
-                    for (let y = 20; y < canvas.height; y += 30) {{
-                        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-                    }}
-
-                    // 노트 바
-                    const barWidth = canvas.width / notes.length;
-                    let currentTargetY = 0;
-
-                    for (let i = 0; i < notes.length; i++) {{
-                        const bx = i * barWidth;
-                        const by = canvas.height - ((notes[i] - 150) / 350 * canvas.height);
-                        
-                        ctx.fillStyle = "rgba(250, 204, 21, 0.85)";
-                        ctx.fillRect(bx + 2, by - 6, barWidth - 4, 12);
-                        ctx.strokeStyle = "#facc15";
-                        ctx.strokeRect(bx + 2, by - 6, barWidth - 4, 12);
-
-                        if (scanX >= bx && scanX < bx + barWidth) {{
-                            currentTargetY = by;
-                        }}
-                    }}
-
-                    // 스캐너 정밀 탐침선
-                    ctx.strokeStyle = "#f43f5e";
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(scanX, 0); ctx.lineTo(scanX, canvas.height);
-                    ctx.stroke();
-
-                    // 실시간 판정
-                    userPitch = detectMicPitch();
-                    const pitchEl = document.getElementById('pitch-val');
-                    const judgeEl = document.getElementById('judge-box');
-                    const comboEl = document.getElementById('combo-box');
-
-                    if (userPitch > 0) {{
-                        pitchEl.innerText = Math.round(userPitch) + " Hz";
-                        const userY = canvas.height - ((userPitch - 150) / 350 * canvas.height);
-                        
-                        userHistory.push({{ x: scanX, y: userY }});
-                        if (userHistory.length > 50) userHistory.shift();
-
-                        const diff = Math.abs(userY - currentTargetY);
-                        if (diff < 22) {{
-                            judgeEl.innerText = "PERFECT!"; judgeEl.style.color = "#34d399";
-                            combo++;
-                            createExplosion(scanX, userY);
-                        }} else if (diff < 40) {{
-                            judgeEl.innerText = "GREAT"; judgeEl.style.color = "#facc15";
-                            combo++;
-                        }} else {{
-                            judgeEl.innerText = "MISS"; judgeEl.style.color = "#f43f5e";
-                            combo = 0;
-                            score = Math.max(40, score - 0.02);
-                            document.getElementById('score-val').innerText = score.toFixed(1);
-                        }}
-                        comboEl.innerText = combo + " COMBO";
-                    }} else {{
-                        pitchEl.innerText = "--- Hz";
-                    }}
-
-                    // 핑크 궤적
-                    ctx.strokeStyle = "#ec4899";
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    for (let i = 0; i < userHistory.length; i++) {{
-                        const pt = userHistory[i];
-                        if (i === 0) ctx.moveTo(pt.x, pt.y);
-                        else ctx.lineTo(pt.x, pt.y);
-                    }}
-                    ctx.stroke();
-
-                    // 파티클 그리기
-                    for(let i=particles.length-1; i>=0; i--) {{
-                        let p = particles[i];
-                        p.x += p.vx; p.y += p.vy; p.life -= 0.03;
-                        if(p.life <= 0) particles.splice(i, 1);
-                        else {{
-                            ctx.fillStyle = p.color;
-                            ctx.globalAlpha = p.life;
-                            ctx.fillRect(p.x, p.y, 4, 4);
-                            ctx.globalAlpha = 1.0;
-                        }}
-                    }}
-
-                    if (isPlaying) scanX = (scanX + 1.5) % canvas.width;
-                    requestAnimationFrame(drawTJScores);
-                }}
-
-                drawTJScores();
-            </script>
-        </body>
-        </html>
-        """
-        components.html(perfect_score_html, height=400)
-
-        st.write("")
-        if st.button("⏭️ 다음 곡으로 넘기기", use_container_width=True):
-            st.session_state.current_song = None
-            st.rerun()
-    else:
-        st.warning("👈 왼쪽 알바센터에서 코인을 번 후 곡을 예약해 보세요!")
+                function
