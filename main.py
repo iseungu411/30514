@@ -1,8 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# 1. 페이지 설정
-st.set_page_config(page_title="CYBER AI KARAOKE", page_icon="🎤", layout="wide")
+st.set_page_config(page_title="REAL SOUND AI KARAOKE", page_icon="🎤", layout="wide")
 
 st.markdown("""
 <style>
@@ -26,13 +25,12 @@ st.markdown("""
     }
 </style>
 <div class="title-container">
-    <div class="title-text">✨ CYBERPUNK AI VOICE KARAOKE STAGE ✨</div>
-    <p style="color: #94a3b8; margin-top: 4px; font-size: 14px;">화려한 네온 무대 위에서 실제 마이크로 노래를 부르고 AI 음정 평가를 받아보세요!</p>
+    <div class="title-text">🎤 MULTI-GENRE REAL SOUND AI KARAOKE STAGE 🎤</div>
+    <p style="color: #94a3b8; margin-top: 4px; font-size: 14px;">죠지의 다양한 명곡과 최신 트랙이 추가되었습니다. MR 반주와 함께 AI 음정 분석을 시작해보세요!</p>
 </div>
 """, unsafe_allow_html=True)
 
-# 2. 사이버펑크 3D 비주얼라이저 & AI 노래방 HTML
-cyber_karaoke_html = """
+real_karaoke_html = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,7 +41,6 @@ cyber_karaoke_html = """
         body { margin: 0; overflow: hidden; background: #030014; font-family: 'Noto Sans KR', sans-serif; }
         canvas { width: 100vw; height: 100vh; display: block; }
 
-        /* 컨트롤 상단바 */
         #ui-layer {
             position: absolute;
             top: 20px;
@@ -55,12 +52,12 @@ cyber_karaoke_html = """
         }
 
         .select-box {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             color: #38bdf8;
             border: 2px solid #06b6d4;
             padding: 10px 20px;
             border-radius: 30px;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Noto Sans KR', sans-serif;
             font-size: 14px;
             font-weight: bold;
             outline: none;
@@ -87,12 +84,11 @@ cyber_karaoke_html = """
             box-shadow: 0 0 30px rgba(236, 72, 153, 0.9);
         }
 
-        /* 실시간 음정 / 점수 네온 패널 */
         #pitch-hud {
             position: absolute;
             top: 20px;
             right: 25px;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             border: 2px solid rgba(168, 85, 247, 0.6);
             padding: 14px 22px;
             border-radius: 20px;
@@ -106,7 +102,6 @@ cyber_karaoke_html = """
         .hud-title { font-size: 11px; color: #cbd5e1; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
         .hud-val { font-size: 24px; font-weight: 900; color: #38bdf8; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px #38bdf8; }
 
-        /* 중앙 네온 가사 디스플레이 */
         #lyrics-box {
             position: absolute;
             bottom: 30px;
@@ -114,7 +109,7 @@ cyber_karaoke_html = """
             transform: translateX(-50%);
             width: 88%;
             max-width: 850px;
-            background: rgba(15, 12, 41, 0.85);
+            background: rgba(15, 12, 41, 0.9);
             border: 2px solid rgba(236, 72, 153, 0.7);
             border-radius: 24px;
             padding: 20px 30px;
@@ -124,8 +119,15 @@ cyber_karaoke_html = """
             z-index: 10;
         }
 
+        .lyric-title {
+            font-size: 14px;
+            color: #38bdf8;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
         .lyric-cur {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
             background: linear-gradient(90deg, #f43f5e, #facc15, #38bdf8);
             -webkit-background-clip: text;
@@ -134,7 +136,7 @@ cyber_karaoke_html = """
             filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.6));
         }
 
-        .lyric-next { font-size: 18px; color: #94a3b8; font-weight: 500; }
+        .lyric-next { font-size: 17px; color: #94a3b8; font-weight: 500; }
 
         #ai-feedback {
             font-size: 16px;
@@ -146,7 +148,6 @@ cyber_karaoke_html = """
             text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
         }
 
-        /* 최종 점수 모달 */
         #modal {
             position: absolute;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -168,11 +169,14 @@ cyber_karaoke_html = """
 
 <div id="ui-layer">
     <select id="song-select" class="select-box">
-        <option value="0">🎵 [K-POP] 비행기 - 리믹스 ver.</option>
-        <option value="1">🎵 [CLASSIC] 학교종이 울린다</option>
-        <option value="2">🎵 [POP] 나비야 나비야</option>
+        <option value="0">🎸 [R&B] 죠지 - routine</option>
+        <option value="1">🤝 [R&B] 죠지 - 손만 잡고 잠을 자자</option>
+        <option value="2">❤️ [R&B] 죠지 - 좋아해..</option>
+        <option value="3">⛵ [R&B] 죠지 - Boat</option>
+        <option value="4">✨ [IDOL] NewJeans - Hype Boy</option>
+        <option value="5">🌧️ [BALLAD] 성시경 - 거리에서</option>
     </select>
-    <button class="btn" onclick="initAudioAndStart()">🎤 마이크 승인 & AI 스테이지 시작</button>
+    <button class="btn" onclick="initAudioAndStart()">🎤 예약 및 노래 시작 (MR 재생)</button>
 </div>
 
 <div id="pitch-hud">
@@ -183,62 +187,91 @@ cyber_karaoke_html = """
 </div>
 
 <div id="lyrics-box">
-    <div id="cur-lyric" class="lyric-cur">마이크 버튼을 클릭하여 콘서트 무대를 시작하세요!</div>
-    <div id="next-lyric" class="lyric-next">AI가 사용자의 음성을 실시간 분석 및 수신합니다.</div>
-    <div id="ai-feedback">STAGE READY</div>
+    <div id="song-label" class="lyric-title">선곡 대기 중</div>
+    <div id="cur-lyric" class="lyric-cur">노래 시작 버튼을 누르면 MR 반주와 함께 가사가 나옵니다</div>
+    <div id="next-lyric" class="lyric-next">마이크로 직접 노래를 따라 불러보세요!</div>
+    <div id="ai-feedback">READY FOR STAGE</div>
 </div>
 
 <div id="modal">
     <h1 id="final-score">98 PTS</h1>
-    <p id="final-eval">AI EVALUATION: 판타스틱한 음정 안정도와 완성도 높은 가창력입니다!</p>
-    <button class="btn" style="margin-top:25px;" onclick="closeModal()">다시 도전하기 🔄</button>
+    <p id="final-eval">AI EVALUATION: 완벽한 박자감과 우수한 가창 음정을 보여주셨습니다!</p>
+    <button class="btn" style="margin-top:25px;" onclick="closeModal()">다른 노래 부르기 🔄</button>
 </div>
 
 <script>
-    // 1. 곡 데이터베이스
     const songDB = [
         {
-            title: "비행기",
+            title: "죠지 - routine",
+            bpm: 88,
             notes: [
-                { time: 0.0, lyric: "프로펠러", next: "돌려라", freq: 329.63 },
-                { time: 0.8, lyric: "프로펠러", next: "돌려라", freq: 293.66 },
-                { time: 1.6, lyric: "프로펠러", next: "돌려라", freq: 261.63 },
-                { time: 2.4, lyric: "프로펠러", next: "돌려라", freq: 293.66 },
-                { time: 3.2, lyric: "돌려라", next: "위로 위로", freq: 329.63 },
-                { time: 4.0, lyric: "돌려라", next: "위로 위로", freq: 329.63 },
-                { time: 4.8, lyric: "위로 위로", next: "솟아라", freq: 293.66 },
-                { time: 5.6, lyric: "위로 위로", next: "솟아라", freq: 293.66 },
-                { time: 6.4, lyric: "솟아라", next: "비행기!", freq: 329.63 },
-                { time: 7.2, lyric: "비행기!", next: "FINISH", freq: 392.00 }
+                { time: 0.0, lyric: "반복되는 하루 속에서", next: "너를 생각하는 게 내 루틴이야", freq: 329.63, chord: [130.81, 164.81, 196.00] },
+                { time: 2.2, lyric: "너를 생각하는 게 내 루틴이야", next: "아침에 눈을 떠 제일 먼저 너를 찾아", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 4.8, lyric: "아침에 눈을 떠 제일 먼저 너를 찾아", next: "익숙해진 이 마음이 좋아", freq: 349.23, chord: [174.61, 220.00, 261.63] },
+                { time: 7.2, lyric: "익숙해진 이 마음이 좋아", next: "FINISH", freq: 392.00, chord: [196.00, 246.94, 293.66] }
             ]
         },
         {
-            title: "학교종",
+            title: "죠지 - 손만 잡고 잠을 자자",
+            bpm: 85,
             notes: [
-                { time: 0.0, lyric: "학교종이", next: "땡땡땡", freq: 392.00 },
-                { time: 0.8, lyric: "학교종이", next: "땡땡땡", freq: 392.00 },
-                { time: 1.6, lyric: "학교종이", next: "땡땡땡", freq: 440.00 },
-                { time: 2.4, lyric: "학교종이", next: "땡땡땡", freq: 440.00 },
-                { time: 3.2, lyric: "땡땡땡", next: "어서 모이자", freq: 392.00 },
-                { time: 4.0, lyric: "땡땡땡", next: "어서 모이자", freq: 392.00 },
-                { time: 4.8, lyric: "어서 모이자", next: "선생님이", freq: 329.63 },
-                { time: 5.6, lyric: "선생님이", next: "기다리신다", freq: 293.66 }
+                { time: 0.0, lyric: "아무 걱정 하지 말고 내게 와", next: "오늘 밤은 그냥 편히 쉬어가", freq: 261.63, chord: [130.81, 164.81, 196.00] },
+                { time: 2.5, lyric: "오늘 밤은 그냥 편히 쉬어가", next: "불을 끄고 조용히 눈을 감아봐", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 5.0, lyric: "불을 끄고 조용히 눈을 감아봐", next: "손만 잡고 잠을 자자", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 7.5, lyric: "손만 잡고 잠을 자자", next: "FINISH", freq: 349.23, chord: [174.61, 220.00, 261.63] }
             ]
         },
         {
-            title: "나비야",
+            title: "죠지 - 좋아해..",
+            bpm: 80,
             notes: [
-                { time: 0.0, lyric: "나비야", next: "나비야", freq: 392.00 },
-                { time: 0.8, lyric: "나비야", next: "이리 날아오너라", freq: 329.63 },
-                { time: 1.6, lyric: "이리 날아", next: "오너라", freq: 329.63 },
-                { time: 2.4, lyric: "오너라", next: "노랑나비", freq: 349.23 },
-                { time: 3.2, lyric: "노랑나비", next: "흰나비", freq: 293.66 },
-                { time: 4.0, lyric: "흰나비", next: "춤을 추며", freq: 293.66 }
+                { time: 0.0, lyric: "왜 네 앞에서는 다 어색해지고", next: "꽤 자연스럽던 내 인사마저도", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 2.5, lyric: "꽤 자연스럽던 내 인사마저도", next: "마음대로 되지가 않아", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 5.0, lyric: "마음대로 되지가 않아", next: "그저 웃어주는 널 바라보면", freq: 261.63, chord: [130.81, 164.81, 196.00] },
+                { time: 7.2, lyric: "그저 웃어주는 널 바라보면", next: "아무 이유 없이 행복해져", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 9.5, lyric: "아무 이유 없이 행복해져", next: "널 좋아한다 말하고 집에 돌아가는 길에", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 12.0, lyric: "널 좋아한다 말하고 집에 돌아가는 길에", next: "너의 얼굴이 자꾸 떠올라", freq: 349.23, chord: [174.61, 220.00, 261.63] },
+                { time: 14.8, lyric: "너의 얼굴이 자꾸 떠올라", next: "나도 몰래 설레였어", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 16.8, lyric: "나도 몰래 설레였어", next: "FINISH", freq: 293.66, chord: [146.83, 174.61, 220.00] }
+            ]
+        },
+        {
+            title: "죠지 - Boat",
+            bpm: 95,
+            notes: [
+                { time: 0.0, lyric: "I'm on a boat", next: "눈에 보이는 사방이 바다야", freq: 329.63, chord: [130.81, 164.81, 196.00] },
+                { time: 1.5, lyric: "눈에 보이는 사방이 바다야", next: "갓 잡아 올린 생선을 회 쳐서 먹어", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 3.5, lyric: "갓 잡아 올린 생선을", next: "회 쳐서 먹어", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 5.0, lyric: "회 쳐서 먹어", next: "I'm on a boat 멀어지는 도시", freq: 349.23, chord: [174.61, 220.00, 261.63] },
+                { time: 6.8, lyric: "I'm on a boat", next: "멀어지는 도시", freq: 329.63, chord: [130.81, 164.81, 196.00] },
+                { time: 8.2, lyric: "멀어지는 도시", next: "We're going on 어딘가로 멀리멀리", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 10.0, lyric: "We're going on", next: "어딘가로 멀리멀리", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 11.5, lyric: "어딘가로 멀리멀리", next: "FINISH", freq: 392.00, chord: [196.00, 246.94, 293.66] }
+            ]
+        },
+        {
+            title: "NewJeans - Hype Boy",
+            bpm: 115,
+            notes: [
+                { time: 0.0, lyric: "Cause I know what you like boy", next: "You're my chemical hype boy", freq: 440.00, chord: [220.00, 261.63, 329.63] },
+                { time: 1.8, lyric: "You're my chemical hype boy", next: "내 깊은 서랍 속에 넣어둔", freq: 392.00, chord: [196.00, 246.94, 293.66] },
+                { time: 3.6, lyric: "내 깊은 서랍 속에 넣어둔", next: "너를 향한 내 마음을 꺼내볼 때", freq: 349.23, chord: [174.61, 220.00, 261.63] },
+                { time: 5.4, lyric: "너를 향한 내 마음을 꺼내볼 때", next: "Take the party going on!", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 7.2, lyric: "Take the party going on!", next: "FINISH", freq: 440.00, chord: [220.00, 277.18, 329.63] }
+            ]
+        },
+        {
+            title: "성시경 - 거리에서",
+            bpm: 72,
+            notes: [
+                { time: 0.0, lyric: "널 기달리는 동안", next: "나에게 올 수 없을 걸 알면서", freq: 261.63, chord: [130.81, 164.81, 196.00] },
+                { time: 2.2, lyric: "나에게 올 수 없을 걸 알면서", next: "그리운 너의 이름을 불러본다", freq: 293.66, chord: [146.83, 174.61, 220.00] },
+                { time: 4.8, lyric: "그리운 너의 이름을 불러본다", next: "스쳐 가는 사람 속에", freq: 329.63, chord: [164.81, 196.00, 246.94] },
+                { time: 7.2, lyric: "스쳐 가는 사람 속에", next: "FINISH", freq: 349.23, chord: [174.61, 220.00, 261.63] }
             ]
         }
     ];
 
-    // 2. AudioContext & Pitch Detection
     let audioCtx = null;
     let analyser = null;
     let micStream = null;
@@ -255,7 +288,7 @@ cyber_karaoke_html = """
             source.connect(analyser);
             isMicActive = true;
         } catch (err) {
-            alert("마이크 연결 실패: 브라우저 권한을 확인해주세요.");
+            alert("마이크 연결 실패: 브라우저 마이크 접근을 허용해야 합니다.");
         }
     }
 
@@ -290,7 +323,34 @@ cyber_karaoke_html = """
         return sampleRate / maxpos;
     }
 
-    // 3. Three.js 화려한 3D 사이버 무대 연출
+    function playMRChordAndBass(chordArray, melodyFreq) {
+        if (!audioCtx) return;
+        
+        chordArray.forEach(freq => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.2);
+        });
+
+        const guideOsc = audioCtx.createOscillator();
+        const guideGain = audioCtx.createGain();
+        guideOsc.type = 'sine';
+        guideOsc.frequency.setValueAtTime(melodyFreq, audioCtx.currentTime);
+        guideGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        guideGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+        guideOsc.connect(guideGain);
+        guideGain.connect(audioCtx.destination);
+        guideOsc.start();
+        guideOsc.stop(audioCtx.currentTime + 0.8);
+    }
+
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x030014, 0.05);
 
@@ -302,28 +362,20 @@ cyber_karaoke_html = """
     renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
-    // 조명
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-    const pointLight = new THREE.PointLight(0xec4899, 3, 20);
-    pointLight.position.set(0, 5, 0);
-    scene.add(pointLight);
-
-    // 중앙 사이버 미러볼 / 코어 링
     const coreGroup = new THREE.Group();
     const coreGeo = new THREE.IcosahedronGeometry(1.5, 2);
     const coreMat = new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
+        color: 0xec4899,
         wireframe: true,
-        emissive: 0x8b5cf6,
+        emissive: 0x38bdf8,
         emissiveIntensity: 0.8
     });
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
     coreGroup.add(coreMesh);
     scene.add(coreGroup);
 
-    // 3D 네온 이퀄라이저 기둥 (32개 원형 배치)
     const bars = [];
     const barCount = 32;
     const radius = 5.5;
@@ -331,43 +383,16 @@ cyber_karaoke_html = """
     for (let i = 0; i < barCount; i++) {
         const angle = (i / barCount) * Math.PI * 2;
         const geo = new THREE.CylinderGeometry(0.12, 0.12, 2, 16);
-        
-        // 무지개 네온 색상 계산
         const color = new THREE.Color();
         color.setHSL(i / barCount, 0.9, 0.6);
         
-        const mat = new THREE.MeshStandardMaterial({
-            color: color,
-            emissive: color,
-            emissiveIntensity: 0.6,
-            roughness: 0.2
-        });
-        
+        const mat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.6 });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius - 2);
         scene.add(mesh);
         bars.push(mesh);
     }
 
-    // 1000개의 우주 파티클 별빛
-    const particleGeo = new THREE.BufferGeometry();
-    const particleCount = 1000;
-    const posArray = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 40;
-    }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const particleMat = new THREE.PointsMaterial({
-        size: 0.08,
-        color: 0xf43f5e,
-        transparent: true,
-        opacity: 0.8
-    });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-
-    // 4. 메인 애니메이션 & 게임 루프
     let isPlaying = false;
     let currentSong = null;
     let startTime = 0;
@@ -380,6 +405,8 @@ cyber_karaoke_html = """
         const songIdx = document.getElementById('song-select').value;
         currentSong = songDB[songIdx];
 
+        document.getElementById('song-label').innerText = "NOW PLAYING: " + currentSong.title;
+
         isPlaying = true;
         noteIdx = 0;
         currentScore = 100;
@@ -387,35 +414,17 @@ cyber_karaoke_html = """
         startTime = Date.now();
     }
 
-    function playMelodyNote(freq) {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.5);
-    }
-
     function animate() {
         requestAnimationFrame(animate);
 
-        // 파티클 및 중앙 코어 회전
-        particles.rotation.y += 0.001;
         coreGroup.rotation.y += 0.01;
         coreGroup.rotation.x += 0.005;
 
-        // 마이크 및 피치 처리
         if (isMicActive && analyser) {
             const buffer = new Float32Array(analyser.fftSize);
             analyser.getFloatTimeDomainData(buffer);
             const userPitch = autoCorrelate(buffer, audioCtx.sampleRate);
 
-            // 네온 기둥 반응 애니메이션
             for (let i = 0; i < bars.length; i++) {
                 const val = Math.abs(buffer[i * 8] || 0) * 12 + 0.3;
                 bars[i].scale.y = val;
@@ -427,7 +436,6 @@ cyber_karaoke_html = """
                 document.getElementById('user-pitch').innerText = "--- Hz";
             }
 
-            // AI 정밀 실시간 음정 채점
             if (isPlaying && currentSong && noteIdx < currentSong.notes.length) {
                 const targetFreq = currentSong.notes[noteIdx].freq;
                 if (userPitch > 0) {
@@ -436,7 +444,7 @@ cyber_karaoke_html = """
                         document.getElementById('ai-feedback').innerText = "🔥 PERFECT! 완벽한 음정입니다!";
                         document.getElementById('ai-feedback').style.color = "#34d399";
                     } else if (diff < 50) {
-                        document.getElementById('ai-feedback').innerText = "✨ GOOD! 잘하고 있어요!";
+                        document.getElementById('ai-feedback').innerText = "✨ GOOD! 감미로운 음색입니다.";
                         document.getElementById('ai-feedback').style.color = "#facc15";
                     } else {
                         document.getElementById('ai-feedback').innerText = "⚡ MISS! 음정이 벗어났습니다.";
@@ -450,18 +458,17 @@ cyber_karaoke_html = """
             }
         }
 
-        // 가사 및 진행 처리
         if (isPlaying && currentSong) {
             const elapsed = (Date.now() - startTime) / 1000;
             if (noteIdx < currentSong.notes.length) {
                 const note = currentSong.notes[noteIdx];
                 if (elapsed >= note.time) {
-                    playMelodyNote(note.freq);
+                    playMRChordAndBass(note.chord, note.freq);
                     document.getElementById('cur-lyric').innerText = note.lyric;
                     document.getElementById('next-lyric').innerText = "NEXT: " + (note.next || "");
                     noteIdx++;
                 }
-            } else if (elapsed > currentSong.notes[currentSong.notes.length - 1].time + 1.8) {
+            } else if (elapsed > currentSong.notes[currentSong.notes.length - 1].time + 2.5) {
                 isPlaying = false;
                 showModal();
             }
@@ -473,17 +480,12 @@ cyber_karaoke_html = """
     function showModal() {
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('final-score').innerText = currentScore + " PTS";
-        
-        let evalText = "대단한 가창력입니다! 음정 정확도가 우수합니다.";
-        if (currentScore < 80) evalText = "음정이 조금 불안정했습니다. 연습을 통해 점수를 높여보세요!";
-        else if (currentScore < 92) evalText = "안정적인 실력입니다! 약간의 고음 연습을 추천합니다.";
-        
-        document.getElementById('final-eval').innerText = "AI 종합 평가: " + evalText;
+        document.getElementById('final-eval').innerText = "AI 종합 평가: 죠지 특유의 감성을 훌륭하게 살린 가창이었습니다!";
     }
 
     window.closeModal = function() {
         document.getElementById('modal').style.display = 'none';
-        document.getElementById('cur-lyric').innerText = "마이크 버튼을 클릭하여 콘서트 무대를 시작하세요!";
+        document.getElementById('cur-lyric').innerText = "노래 시작 버튼을 누르면 MR 반주와 함께 가사가 나옵니다";
     };
 
     window.initAudioAndStart = initAudioAndStart;
@@ -493,4 +495,4 @@ cyber_karaoke_html = """
 </html>
 """
 
-components.html(cyber_karaoke_html, height=650)
+components.html(real_karaoke_html, height=660)
