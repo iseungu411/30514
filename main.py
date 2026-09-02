@@ -393,4 +393,126 @@ with col_right:
                     return rms > 0.015 ? rms * 1500 : 0;
                 }}
 
-                function
+                function createExplosion(x, y) {{
+                    for(let i=0; i<6; i++) {{
+                        particles.push({{
+                            x: x, y: y,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: (Math.random() - 0.5) * 6,
+                            life: 1.0, color: ["#facc15", "#34d399", "#ec4899"][Math.floor(Math.random()*3)]
+                        }});
+                    }}
+                }}
+
+                function drawTJScores() {{
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // 마디 가이드라인
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+                    ctx.lineWidth = 1;
+                    for (let y = 20; y < canvas.height; y += 30) {{
+                        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+                    }}
+
+                    // 퍼펙트스코어 노트 바
+                    const barWidth = canvas.width / notes.length;
+                    let currentTargetY = 0;
+
+                    for (let i = 0; i < notes.length; i++) {{
+                        const bx = i * barWidth;
+                        const by = canvas.height - ((notes[i] - 150) / 350 * canvas.height);
+                        
+                        ctx.fillStyle = "rgba(250, 204, 21, 0.85)";
+                        ctx.shadowColor = "#facc15"; ctx.shadowBlur = 8;
+                        ctx.fillRect(bx + 2, by - 6, barWidth - 4, 12);
+                        ctx.strokeStyle = "#ffffff";
+                        ctx.strokeRect(bx + 2, by - 6, barWidth - 4, 12);
+                        ctx.shadowBlur = 0;
+
+                        if (scanX >= bx && scanX < bx + barWidth) {{
+                            currentTargetY = by;
+                        }}
+                    }}
+
+                    // 스캐너 라인
+                    ctx.strokeStyle = "#f43f5e";
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(scanX, 0); ctx.lineTo(scanX, canvas.height);
+                    ctx.stroke();
+
+                    // 음정 판정
+                    userPitch = detectMicPitch();
+                    const pitchEl = document.getElementById('pitch-val');
+                    const judgeEl = document.getElementById('judge-box');
+                    const comboEl = document.getElementById('combo-box');
+
+                    if (userPitch > 0) {{
+                        pitchEl.innerText = Math.round(userPitch) + " Hz";
+                        const userY = canvas.height - ((userPitch - 150) / 350 * canvas.height);
+                        
+                        userHistory.push({{ x: scanX, y: userY }});
+                        if (userHistory.length > 50) userHistory.shift();
+
+                        const diff = Math.abs(userY - currentTargetY);
+                        if (diff < 22) {{
+                            judgeEl.innerText = "PERFECT!"; judgeEl.style.color = "#34d399";
+                            combo++;
+                            createExplosion(scanX, userY);
+                        }} else if (diff < 40) {{
+                            judgeEl.innerText = "GREAT"; judgeEl.style.color = "#facc15";
+                            combo++;
+                        }} else {{
+                            judgeEl.innerText = "MISS"; judgeEl.style.color = "#f43f5e";
+                            combo = 0;
+                            score = Math.max(40, score - 0.02);
+                            document.getElementById('score-val').innerText = score.toFixed(1);
+                        }}
+                        comboEl.innerText = combo + " COMBO";
+                    }} else {{
+                        pitchEl.innerText = "--- Hz";
+                    }}
+
+                    // 음정 파동 궤적
+                    ctx.strokeStyle = "#ec4899";
+                    ctx.shadowColor = "#ec4899"; ctx.shadowBlur = 10;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    for (let i = 0; i < userHistory.length; i++) {{
+                        const pt = userHistory[i];
+                        if (i === 0) ctx.moveTo(pt.x, pt.y);
+                        else ctx.lineTo(pt.x, pt.y);
+                    }}
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    // 폭죽 파티클
+                    for(let i=particles.length-1; i>=0; i--) {{
+                        let p = particles[i];
+                        p.x += p.vx; p.y += p.vy; p.life -= 0.025;
+                        if(p.life <= 0) particles.splice(i, 1);
+                        else {{
+                            ctx.fillStyle = p.color;
+                            ctx.globalAlpha = p.life;
+                            ctx.fillRect(p.x, p.y, 5, 5);
+                            ctx.globalAlpha = 1.0;
+                        }}
+                    }}
+
+                    if (isPlaying) scanX = (scanX + 1.6) % canvas.width;
+                    requestAnimationFrame(drawTJScores);
+                }}
+
+                drawTJScores();
+            </script>
+        </body>
+        </html>
+        """
+        components.html(perfect_score_html, height=420)
+
+        st.write("")
+        if st.button("⏭️ 다음 곡으로 넘기기", use_container_width=True):
+            st.session_state.current_song = None
+            st.rerun()
+    else:
+        st.warning("👈 코인을 벌고 동요를 예약해 보세요!")
