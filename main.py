@@ -1,474 +1,373 @@
 import streamlit as st
-import streamlit.components.v1 as components
+import random
 import time
 
-st.set_page_config(page_title="TJ PERFECT SCORE KARAOKE", page_icon="🎤", layout="wide")
+# 웹 페이지 레이아웃 & 아이콘 설정
+st.set_page_config(page_title="Legendary Hero RPG: OVERLOAD", page_icon="⚔️", layout="centered")
 
-# 세션 상태 초기화
-if "coins" not in st.session_state:
-    st.session_state.coins = 10
-if "queue" not in st.session_state:
-    st.session_state.queue = []
-if "current_song" not in st.session_state:
-    st.session_state.current_song = None
-
-# 자체 오디오 엔진용 악보/MR 데이터베이스
-SONG_DATABASE = {
-    "🐻 [동요] 곰 세 마리 (TJ 1001)": {
-        "tj_num": "1001",
-        "notes": [261, 261, 261, 261, 261, 329, 392, 392, 329, 261, 392, 392, 329, 261, 261, 261],
-        "lyrics": ["곰 세 마 리 가", "한 집에 있어", "아 빠 곰", "엄 마 곰", "애 기 곰"],
-        "chords": [261, 261, 329, 329, 392, 392, 261, 261],
-        "bpm": 120
-    },
-    "✈️ [동요] 비행기 (TJ 1002)": {
-        "tj_num": "1002",
-        "notes": [329, 293, 261, 293, 329, 329, 329, 293, 293, 293, 329, 392, 392, 329, 293, 261],
-        "lyrics": ["떴 다 떴 다", "비 행 기", "날 아 라", "날 아 라", "높 이 높 이 날 아 라"],
-        "chords": [329, 293, 261, 293, 329, 329, 392, 392],
-        "bpm": 125
-    },
-    "⭐ [동요] 작은 별 (TJ 1003)": {
-        "tj_num": "1003",
-        "notes": [261, 261, 392, 392, 440, 440, 392, 349, 349, 329, 329, 293, 293, 261],
-        "lyrics": ["반 짝 반 짝", "작 은 별", "아 름 답 게", "비 치 네", "동 쪽 하 늘 에 서 도"],
-        "chords": [261, 392, 440, 392, 349, 329, 293, 261],
-        "bpm": 105
-    },
-    "🔔 [동요] 학교 종 (TJ 1004)": {
-        "tj_num": "1004",
-        "notes": [392, 392, 440, 440, 392, 392, 329, 392, 392, 329, 329, 293, 392, 392, 440],
-        "lyrics": ["학 교 종 이", "땡 땡 땡", "어 어 서 모 이 자", "선 생 님 이", "기 다 리 신 다"],
-        "chords": [392, 440, 392, 329, 392, 329, 293, 392],
-        "bpm": 115
-    }
-}
-
+# --- 🎨 극강의 사이버펑크 & 그래픽 CSS 스타일 ---
 st.markdown("""
-<style>
-    .stApp { background-color: #020108; color: #ffffff; }
-    .coin-badge {
-        background: linear-gradient(135deg, #ec4899, #8b5cf6);
-        padding: 16px; border-radius: 16px; text-align: center;
-        font-weight: 900; font-size: 24px; color: #fff;
-        box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800;900&display=swap');
+
+    .stApp {
+        background: radial-gradient(circle at center, #121624 0%, #080911 100%);
+        color: #ffffff;
+        font-family: 'Segoe UI', Roboto, sans-serif;
     }
-</style>
+    
+    .game-title {
+        font-family: 'Orbitron', sans-serif;
+        text-align: center;
+        font-size: 2.6rem;
+        font-weight: 900;
+        background: linear-gradient(180deg, #00f0ff 0%, #ff007f 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+        margin-bottom: 5px;
+    }
+
+    /* 네온 카드 패널 */
+    .hero-card {
+        background: rgba(18, 22, 36, 0.7);
+        border: 2px solid #00f0ff;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .weapon-card {
+        background: rgba(18, 22, 36, 0.7);
+        border: 2px solid #ff007f;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(255, 0, 127, 0.2), inset 0 0 15px rgba(255, 0, 127, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .art-avatar {
+        font-size: 4rem;
+        filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
+        transition: transform 0.2s;
+    }
+
+    /* 전장 애니메이션 무대 */
+    .battle-arena {
+        background: linear-gradient(180deg, #1f082b 0%, #0a0212 100%);
+        border: 3px solid #ff007f;
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(255, 0, 127, 0.4);
+    }
+
+    /* 커스텀 버튼 커스터마이징 */
+    div.stButton > button {
+        width: 100% !important;
+        height: 52px !important;
+        border-radius: 12px !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        background: linear-gradient(135deg, #1e2640 0%, #111525 100%) !important;
+        color: #00f0ff !important;
+        border: 1px solid #00f0ff !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.6) !important;
+        background: linear-gradient(135deg, #00f0ff 0%, #7928ca 100%) !important;
+        color: #ffffff !important;
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-st.title("💖 ✨ TJ PERFECT SCORE ULTIMATE KARAOKE ✨ 💖")
-st.caption("외부 영상 오류 걱정 없는 100% 자체 구동 퍼펙트스코어 시뮬레이터")
-
-col_left, col_right = st.columns([1.1, 2])
-
-# 1. 알바센터 및 예약 시스템
-with col_left:
-    st.subheader("💰 코인노래방 알바센터")
-    st.markdown(f'<div class="coin-badge">✨ 보유 코인: {st.session_state.coins} 코인 ✨</div>', unsafe_allow_html=True)
-    st.write("")
-    
-    t1, t2, t3 = st.tabs(["🧹 방 청소", "🥤 음료 채우기", "🛎️ 잔돈 계산"])
-    
-    with t1:
-        st.write("**3번 방 마이크 소독 및 VIP 미러볼 청소**")
-        if st.button("🧹 방 청소 완료 (+1코인)", use_container_width=True):
-            with st.spinner("소독제 뿌리는 중... ✨"):
-                time.sleep(0.3)
-            st.session_state.coins += 1
-            st.success("1코인 획득!")
-            st.rerun()
-
-    with t2:
-        st.write("**음료 냉장고 정렬하기**")
-        drink = st.selectbox("선택", ["식혜", "이온음료", "탄산수"])
-        if st.button("🥤 정렬 완료 (+1코인)", use_container_width=True):
-            st.session_state.coins += 1
-            st.success(f"{drink} 정렬 완료! 1코인 획득!")
-            st.rerun()
-
-    with t3:
-        st.write("**5,000원 지불 시 500원 동전 개수는?**")
-        ans = st.number_input("개수 입력", min_value=0, max_value=20, value=0)
-        if st.button("🛎️ 거스름돈 전달 (+2코인)", use_container_width=True):
-            if ans == 10:
-                st.session_state.coins += 2
-                st.success("정답! 2코인 획득!")
-                st.rerun()
-            else:
-                st.error("오답입니다! (5,000원 = 500원 x 10개)")
-
-    st.divider()
-
-    st.subheader("🎶 노래 예약하기")
-    selected_song_key = st.selectbox("수록곡 선택", list(SONG_DATABASE.keys()))
-
-    if st.button("📌 곡 예약하기 (1코인 차감)", use_container_width=True):
-        if st.session_state.coins <= 0:
-            st.error("코인이 부족합니다! 알바를 먼저 수행하세요.")
-        else:
-            song_data = SONG_DATABASE[selected_song_key]
-            st.session_state.queue.append({
-                "title": selected_song_key,
-                "tj_num": song_data["tj_num"],
-                "notes": song_data["notes"],
-                "lyrics": song_data["lyrics"],
-                "chords": song_data["chords"],
-                "bpm": song_data["bpm"]
-            })
-            st.session_state.coins -= 1
-            st.success("곡이 예약되었습니다!")
-            st.rerun()
-
-    st.subheader("📋 대기 목록")
-    if st.session_state.queue:
-        for idx, item in enumerate(st.session_state.queue, 1):
-            st.write(f"**{idx}.** {item['title']}")
-    else:
-        st.caption("예약된 곡이 없습니다.")
-
-# 2. 메인 가창 모니터
-with col_right:
-    st.subheader("📺 TJ 퍼펙트스코어 가창 모니터")
-
-    if not st.session_state.current_song and st.session_state.queue:
-        st.session_state.current_song = st.session_state.queue.pop(0)
+# 안전한 Rerun 지원
+def safe_rerun():
+    if hasattr(st, "rerun"):
         st.rerun()
-
-    if st.session_state.current_song:
-        song = st.session_state.current_song
-        st.info(f"🎤 **NOW PLAYING:** {song['title']} (TJ 번호: {song['tj_num']})")
-
-        perfect_score_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-                body {{ background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }}
-                #stage {{
-                    position: relative; width: 100%; height: 350px;
-                    background: radial-gradient(circle at center, #2e1065 0%, #030014 100%);
-                    border: 3px solid #ec4899; border-radius: 16px; overflow: hidden;
-                    box-shadow: 0 0 30px rgba(236, 72, 153, 0.6);
-                }}
-                canvas {{ width: 100%; height: 100%; display: block; }}
-                #hud {{
-                    position: absolute; top: 12px; right: 15px;
-                    background: rgba(15, 23, 42, 0.85); padding: 8px 16px;
-                    border-radius: 12px; border: 1px solid #38bdf8; text-align: right;
-                }}
-                .val {{ font-size: 20px; font-weight: 900; color: #38bdf8; }}
-                #judge-box {{
-                    position: absolute; top: 15px; left: 20px;
-                    font-size: 38px; font-weight: 900; color: #facc15;
-                    text-shadow: 0 0 20px #facc15;
-                }}
-                #combo-box {{
-                    position: absolute; top: 62px; left: 20px;
-                    font-size: 22px; font-weight: bold; color: #f43f5e;
-                }}
-                #lyrics-box {{
-                    position: absolute; bottom: 10px; width: 100%; text-align: center;
-                    font-size: 26px; font-weight: 900; color: #38bdf8;
-                    text-shadow: 0 0 15px #0284c7;
-                    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 8px 0;
-                }}
-                #result-overlay {{
-                    position: absolute; top:0; left:0; width:100%; height:100%;
-                    background: rgba(0,0,0,0.9); display: none; flex-direction: column;
-                    justify-content: center; align-items: center; z-index: 10;
-                }}
-                #result-score {{
-                    font-size: 70px; font-weight: 900; color: #facc15;
-                    text-shadow: 0 0 30px #facc15;
-                }}
-                .controls {{
-                    background: #0d0826; padding: 12px; border-radius: 12px;
-                    border: 1px solid #6366f1; margin-top: 10px; text-align: center;
-                    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
-                }}
-                button {{
-                    background: linear-gradient(135deg, #ec4899, #a855f7);
-                    color: #fff; border: none; padding: 10px 18px;
-                    font-weight: bold; font-size: 15px; border-radius: 8px; cursor: pointer;
-                    box-shadow: 0 0 12px rgba(236, 72, 153, 0.5);
-                }}
-            </style>
-        </head>
-        <body>
-            <div id="stage">
-                <div id="judge-box">READY</div>
-                <div id="combo-box">0 COMBO</div>
-                <div id="hud">
-                    <div>🎙️ PITCH: <span id="pitch-val" class="val">--- Hz</span></div>
-                    <div>🎯 SCORE: <span id="score-val" class="val" style="color:#ec4899;">100.0</span></div>
-                </div>
-                <canvas id="tjCanvas"></canvas>
-                <div id="lyrics-box">🎤 [▶️ 반주 시작] 버튼을 누르세요</div>
-
-                <div id="result-overlay">
-                    <div style="font-size:28px; color:#38bdf8; font-weight:bold;">🎉 가창 완료! 점수 발표 🎉</div>
-                    <div id="result-score">100 점</div>
-                    <div style="font-size:22px; color:#4ade80; margin-top:10px;">🏆 완벽한 100점 만점입니다! 🏆</div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <button id="start-btn" onclick="startMR()">▶️ 반주 시작</button>
-                <button id="ai-sing-btn" onclick="toggleAISing()">🤖 AI 보컬 시연</button>
-                <button onclick="playApplause()">👏 환호 박수</button>
-                <button onclick="playFanfare()">🎉 팡파레</button>
-                <button style="background:#ef4444;" onclick="finishSong()">🏁 점수 발표 (100점)</button>
-            </div>
-
-            <script>
-                const canvas = document.getElementById('tjCanvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = canvas.offsetWidth;
-                canvas.height = canvas.offsetHeight;
-
-                const notes = {song['notes']};
-                const lyrics = {song['lyrics']};
-                const chords = {song['chords']};
-                let bpm = {song['bpm']};
-
-                let audioCtx, analyser, isPlaying = false, aiSinging = false;
-                let userPitch = 0, score = 100.0, combo = 0, scanX = 0;
-                let userHistory = [], particles = [], noteIdx = 0;
-
-                async function startMR() {{
-                    if (isPlaying) return;
-                    document.getElementById('start-btn').style.display = 'none';
-                    isPlaying = true;
-
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    try {{
-                        analyser = audioCtx.createAnalyser();
-                        analyser.fftSize = 2048;
-                        const stream = await navigator.mediaDevices.getUserMedia({{ audio: true }});
-                        audioCtx.createMediaStreamSource(stream).connect(analyser);
-                    }} catch(e) {{}}
-
-                    playMultiChannelMREngine();
-                }}
-
-                function toggleAISing() {{
-                    aiSinging = !aiSinging;
-                    const btn = document.getElementById('ai-sing-btn');
-                    btn.innerText = aiSinging ? "🤖 AI 가창 중지" : "🤖 AI 보컬 시연";
-                    btn.style.background = aiSinging ? "linear-gradient(135deg, #ef4444, #b91c1c)" : "linear-gradient(135deg, #ec4899, #a855f7)";
-                }}
-
-                function playApplause() {{
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    for(let i=0; i<20; i++) {{
-                        setTimeout(() => {{
-                            let osc = audioCtx.createOscillator();
-                            let gain = audioCtx.createGain();
-                            osc.type = 'sine';
-                            osc.frequency.setValueAtTime(400 + Math.random()*800, audioCtx.currentTime);
-                            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
-                            osc.connect(gain); gain.connect(audioCtx.destination);
-                            osc.start(); osc.stop(audioCtx.currentTime + 0.12);
-                        }}, i * 35);
-                    }}
-                }}
-
-                function playFanfare() {{
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const scale = [523, 659, 783, 1046];
-                    scale.forEach((freq, idx) => {{
-                        setTimeout(() => {{
-                            let osc = audioCtx.createOscillator();
-                            let gain = audioCtx.createGain();
-                            osc.type = 'triangle';
-                            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                            osc.connect(gain); gain.connect(audioCtx.destination);
-                            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-                        }}, idx * 100);
-                    }});
-                }}
-
-                function finishSong() {{
-                    document.getElementById('result-overlay').style.display = 'flex';
-                    playFanfare();
-                    playApplause();
-                    for(let i=0; i<100; i++) {{
-                        particles.push({{
-                            x: canvas.width / 2, y: canvas.height / 2,
-                            vx: (Math.random() - 0.5) * 12,
-                            vy: (Math.random() - 0.5) * 12,
-                            life: 2.0, color: ["#facc15", "#ec4899", "#38bdf8", "#4ade80"][Math.floor(Math.random()*4)]
-                        }});
-                    }}
-                }}
-
-                function playMultiChannelMREngine() {{
-                    if (!isPlaying) return;
-                    const time = audioCtx.currentTime;
-                    const interval = (60 / bpm) * 1000;
-
-                    const melFreq = notes[noteIdx % notes.length];
-                    const chordFreq = chords[noteIdx % chords.length] / 2;
-
-                    // Melodic MR Sound
-                    let melOsc = audioCtx.createOscillator();
-                    let melGain = audioCtx.createGain();
-                    melOsc.type = 'triangle';
-                    melOsc.frequency.setValueAtTime(melFreq, time);
-                    melGain.gain.setValueAtTime(0.18, time);
-                    melGain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
-                    melOsc.connect(melGain); melGain.connect(audioCtx.destination);
-                    melOsc.start(time); melOsc.stop(time + 0.35);
-
-                    // AI Vocals
-                    if (aiSinging) {{
-                        let aiOsc = audioCtx.createOscillator();
-                        let aiGain = audioCtx.createGain();
-                        aiOsc.type = 'sine';
-                        aiOsc.frequency.setValueAtTime(melFreq * 2, time);
-                        aiGain.gain.setValueAtTime(0.2, time);
-                        aiGain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
-                        aiOsc.connect(aiGain); aiGain.connect(audioCtx.destination);
-                        aiOsc.start(time); aiOsc.stop(time + 0.3);
-                    }}
-
-                    // Rhythm Drum
-                    let kickOsc = audioCtx.createOscillator();
-                    let kickGain = audioCtx.createGain();
-                    kickOsc.frequency.setValueAtTime(120, time);
-                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
-                    kickGain.gain.setValueAtTime(0.25, time);
-                    kickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
-                    kickOsc.connect(kickGain); kickGain.connect(audioCtx.destination);
-                    kickOsc.start(time); kickOsc.stop(time + 0.1);
-
-                    document.getElementById('lyrics-box').innerText = lyrics[noteIdx % lyrics.length];
-
-                    noteIdx++;
-                    if (noteIdx >= notes.length * 2) {{
-                        finishSong();
-                    }} else {{
-                        setTimeout(playMultiChannelMREngine, interval);
-                    }}
-                }}
-
-                function detectMicPitch() {{
-                    if (aiSinging) {{
-                        return notes[(noteIdx - 1 + notes.length) % notes.length];
-                    }}
-                    if (!analyser) return 0;
-                    const buf = new Float32Array(2048);
-                    analyser.getFloatTimeDomainData(buf);
-                    let sum = 0;
-                    for (let i = 0; i < 2048; i++) sum += buf[i] * buf[i];
-                    let rms = Math.sqrt(sum / 2048);
-                    return rms > 0.015 ? rms * 1500 : 0;
-                }}
-
-                function drawTJScores() {{
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // 마디 가이드라인
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-                    ctx.lineWidth = 1;
-                    for (let y = 20; y < canvas.height; y += 30) {{
-                        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-                    }}
-
-                    // 타겟 노트 바
-                    const barWidth = canvas.width / notes.length;
-                    let currentTargetY = 0;
-
-                    for (let i = 0; i < notes.length; i++) {{
-                        const bx = i * barWidth;
-                        const by = canvas.height - ((notes[i] - 150) / 350 * canvas.height);
-                        
-                        ctx.fillStyle = "rgba(250, 204, 21, 0.85)";
-                        ctx.fillRect(bx + 2, by - 6, barWidth - 4, 12);
-                        ctx.strokeStyle = "#ffffff";
-                        ctx.strokeRect(bx + 2, by - 6, barWidth - 4, 12);
-
-                        if (scanX >= bx && scanX < bx + barWidth) {{
-                            currentTargetY = by;
-                        }}
-                    }}
-
-                    // 탐침선
-                    ctx.strokeStyle = "#f43f5e";
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(scanX, 0); ctx.lineTo(scanX, canvas.height);
-                    ctx.stroke();
-
-                    // 음정 판정
-                    userPitch = detectMicPitch();
-                    const pitchEl = document.getElementById('pitch-val');
-                    const judgeEl = document.getElementById('judge-box');
-                    const comboEl = document.getElementById('combo-box');
-
-                    if (userPitch > 0) {{
-                        pitchEl.innerText = Math.round(userPitch) + " Hz";
-                        const userY = canvas.height - ((userPitch - 150) / 350 * canvas.height);
-                        
-                        userHistory.push({{ x: scanX, y: userY }});
-                        if (userHistory.length > 50) userHistory.shift();
-
-                        const diff = Math.abs(userY - currentTargetY);
-                        if (diff < 25) {{
-                            judgeEl.innerText = "PERFECT!"; judgeEl.style.color = "#34d399";
-                            combo++;
-                        }} else {{
-                            judgeEl.innerText = "GREAT"; judgeEl.style.color = "#facc15";
-                            combo++;
-                        }}
-                        comboEl.innerText = combo + " COMBO";
-                    }} else {{
-                        pitchEl.innerText = "--- Hz";
-                    }}
-
-                    // 사용자 궤적
-                    ctx.strokeStyle = "#ec4899";
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    for (let i = 0; i < userHistory.length; i++) {{
-                        const pt = userHistory[i];
-                        if (i === 0) ctx.moveTo(pt.x, pt.y);
-                        else ctx.lineTo(pt.x, pt.y);
-                    }}
-                    ctx.stroke();
-
-                    // 폭죽 파티클
-                    for(let i=particles.length-1; i>=0; i--) {{
-                        let p = particles[i];
-                        p.x += p.vx; p.y += p.vy; p.life -= 0.025;
-                        if(p.life <= 0) particles.splice(i, 1);
-                        else {{
-                            ctx.fillStyle = p.color;
-                            ctx.globalAlpha = p.life;
-                            ctx.fillRect(p.x, p.y, 5, 5);
-                            ctx.globalAlpha = 1.0;
-                        }}
-                    }}
-
-                    if (isPlaying) scanX = (scanX + 1.6) % canvas.width;
-                    requestAnimationFrame(drawTJScores);
-                }}
-
-                drawTJScores();
-            </script>
-        </body>
-        </html>
-        """
-        components.html(perfect_score_html, height=420)
-
-        st.write("")
-        if st.button("⏭️ 다음 곡으로 넘기기", use_container_width=True):
-            st.session_state.current_song = None
-            st.rerun()
     else:
-        st.warning("👈 코인을 번 후 동요를 예약해 보세요!")
+        st.experimental_rerun()
+
+# --- 🔊 브라우저 효과음 시스템 ---
+def play_sfx(sfx_type):
+    sfx_urls = {
+        "slash": "https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3",
+        "upgrade": "https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3",
+        "defeat": "https://assets.mixkit.co/active_storage/sfx/2658/2658-preview.mp3"
+    }
+    if sfx_type in sfx_urls:
+        st.components.v1.html(
+            f'<audio autoplay style="display:none;"><source src="{sfx_urls[sfx_type]}" type="audio/mpeg"></audio>',
+            height=0
+        )
+
+# --- ⚔️ 무기 데이터 ---
+WEAPON_DATA = [
+    {"name": "수련용 나무검", "art": "🗡️", "base": 15},
+    {"name": "기사의 강철검", "art": "⚔️", "base": 40},
+    {"name": "플라즈마 세이버", "art": "🗡️⚡", "base": 85},
+    {"name": "드래곤 슬레이어", "art": "⚔️🔥", "base": 160},
+    {"name": "신멸의 차원창", "art": "🔱🌌", "base": 300}
+]
+
+# --- 👹 몬스터 데이터 (패턴 및 보스 포함) ---
+MONSTERS = [
+    {"name": "하급 슬라임", "art": "🟢", "hp": 100, "req_atk": 25, "reward": 250, "boss": False},
+    {"name": "변종 고블린", "art": "👺", "hp": 220, "req_atk": 60, "reward": 700, "boss": False},
+    {"name": "강철 오크", "art": "👹", "hp": 500, "req_atk": 130, "reward": 1800, "boss": False},
+    {"name": "화염 군주 드래곤", "art": "🐉🔥", "hp": 1200, "req_atk": 280, "reward": 5000, "boss": True},
+    {"name": "심연의 멸망자 마왕", "art": "👾⚡", "hp": 3000, "req_atk": 500, "reward": 15000, "boss": True}
+]
+
+# --- 🎮 데이터 세션 초기화 ---
+def init_game():
+    st.session_state.hero_name = "아스날"
+    st.session_state.hero_level = 1
+    st.session_state.gold = 1500
+    st.session_state.weapon_lvl = 0
+    st.session_state.weapon_tier = 0
+    st.session_state.protection_scrolls = 1  # 파괴 방지권
+    st.session_state.ring_lvl = 0             # 보조 장신구
+    st.session_state.log = ["✨ 전설의 모험가여, 아레나에 오신 것을 환영합니다!"]
+
+if "gold" not in st.session_state:
+    init_game()
+
+# --- 📊 스탯 및 비용 계산 ---
+def get_hero_atk():
+    return st.session_state.hero_level * 20
+
+def get_weapon_atk():
+    w = WEAPON_DATA[st.session_state.weapon_tier]
+    return w["base"] + (st.session_state.weapon_lvl * 15)
+
+def get_ring_atk():
+    return st.session_state.ring_lvl * 35
+
+def get_total_atk():
+    return get_hero_atk() + get_weapon_atk() + get_ring_atk()
+
+def get_w_cost():
+    return (st.session_state.weapon_lvl + 1) * 200
+
+def get_h_cost():
+    return st.session_state.hero_level * 250
+
+def get_w_rate():
+    return max(15, 100 - (st.session_state.weapon_lvl * 6))
+
+# --- 🔨 강화/육성 행동 로직 ---
+def enhance_weapon():
+    cost = get_w_cost()
+    if st.session_state.gold < cost:
+        st.toast("⚠️ 골드가 부족합니다!", icon="💰")
+        return
+    st.session_state.gold -= cost
+
+    rate = get_w_rate()
+    if random.randint(1, 100) <= rate:
+        st.session_state.weapon_lvl += 1
+        play_sfx("upgrade")
+        if st.session_state.weapon_lvl % 4 == 0 and st.session_state.weapon_tier < len(WEAPON_DATA) - 1:
+            st.session_state.weapon_tier += 1
+            st.toast("🌟 무기 외형과 등급이 초월 진화했습니다!", icon="💎")
+        st.session_state.log.append(f"⚔️ 무기 강화 성공! (+{st.session_state.weapon_lvl})")
+    else:
+        # 방지권이 있는 경우
+        if st.session_state.protection_scrolls > 0 and st.session_state.weapon_lvl >= 5:
+            st.session_state.protection_scrolls -= 1
+            st.toast("🛡️ 파괴 방지권이 소모되어 강화 단계가 유지되었습니다!", icon="🛡️")
+            st.session_state.log.append("🛡️ 강화 실패 (방지권으로 단계 보존)")
+        else:
+            st.session_state.weapon_lvl = max(0, st.session_state.weapon_lvl - 1)
+            play_sfx("defeat")
+            st.session_state.log.append("❌ 무기 강화 실패! 단계 하락")
+    safe_rerun()
+
+def enhance_hero():
+    cost = get_h_cost()
+    if st.session_state.gold < cost:
+        st.toast("⚠️ 골드가 부족합니다!", icon="💰")
+        return
+    st.session_state.gold -= cost
+    st.session_state.hero_level += 1
+    play_sfx("upgrade")
+    st.session_state.log.append(f"🦸 {st.session_state.hero_name} 훈련 완료 (Lv.{st.session_state.hero_level})")
+    safe_rerun()
+
+def buy_protection():
+    if st.session_state.gold >= 3000:
+        st.session_state.gold -= 3000
+        st.session_state.protection_scrolls += 1
+        st.toast("📜 파괴 방지권을 구입했습니다!", icon="📜")
+        safe_rerun()
+    else:
+        st.toast("⚠️ 골드가 부족합니다 (3,000 G 필요)", icon="💰")
+
+# --- ⚔️ 실시간 연출 전투 모달 ---
+@st.dialog("⚔️ BATTLE ARENA ⚔️")
+def start_battle_modal():
+    monster = random.choice(MONSTERS)
+    w_art = WEAPON_DATA[st.session_state.weapon_tier]["art"]
+    total_atk = get_total_atk()
+    
+    boss_tag = "🔥 [BOSS] " if monster["boss"] else ""
+    st.markdown(f"### {boss_tag}**{monster['name']}** 과(와) 대치 중!")
+    
+    # HP 바 및 캐릭터 연출
+    hp_progress = st.progress(1.0)
+    battle_display = st.empty()
+    status_msg = st.empty()
+    
+    # 1. 대치 화면
+    battle_display.markdown(f"""
+        <div class='battle-arena'>
+            <span class='art-avatar'>🦸‍♂️{w_art}</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ⚔️ VS ⚔️ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span class='art-avatar'>{monster['art']}</span>
+        </div>
+    """, unsafe_allow_html=True)
+    status_msg.info("⚡ 전투 태세를 갖추고 있습니다...")
+    time.sleep(0.8)
+    
+    # 2. 실시간 연타 공격 모션 (3회 타격 애니메이션)
+    current_hp = monster["hp"]
+    play_sfx("slash")
+    
+    for attack_round in range(1, 4):
+        damage = int(total_atk * random.uniform(0.3, 0.5))
+        current_hp = max(0, current_hp - damage)
+        hp_ratio = current_hp / monster["hp"]
+        
+        hp_progress.progress(hp_ratio)
+        battle_display.markdown(f"""
+            <div class='battle-arena'>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class='art-avatar' style='transform: translateX(30px);'>🦸‍♂️{w_art}</span>
+                <span style='font-size:3rem;'>💥</span>
+                <span class='art-avatar'>{monster['art']}</span>
+            </div>
+        """, unsafe_allow_html=True)
+        status_msg.warning(f"💥 {attack_round}차 연타 공격! -{damage} DMG!")
+        time.sleep(0.5)
+
+    # 3. 승패 최종 결정
+    win_rate = min(95, max(15, int((total_atk / monster["req_atk"]) * 70)))
+    
+    if random.randint(1, 100) <= win_rate:
+        # 승리
+        hp_progress.progress(0.0)
+        battle_display.markdown(f"""
+            <div class='battle-arena'>
+                <span class='art-avatar'>🦸‍♂️{w_art}</span> 👑
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style='font-size:3rem;'>💥💀</span>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        reward = monster["reward"] + random.randint(100, 500)
+        st.session_state.gold += reward
+        play_sfx("upgrade")
+        st.session_state.log.append(f"🎉 [{monster['name']}] 처치 완료! (+{reward:,} G)")
+        status_msg.success(f"🏆 승리! [{monster['name']}]을 처치하고 {reward:,} Gold를 획득했습니다!")
+    else:
+        # 패배
+        battle_display.markdown(f"""
+            <div class='battle-arena'>
+                <span style='font-size:3rem;'>💥💫🏃‍♂️</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class='art-avatar'>{monster['art']}</span>😈
+            </div>
+        """, unsafe_allow_html=True)
+        
+        penalty = random.randint(200, 500)
+        st.session_state.gold = max(0, st.session_state.gold - penalty)
+        play_sfx("defeat")
+        st.session_state.log.append(f"☠️ [{monster['name']}] 사냥 실패... (-{penalty:,} G)")
+        status_msg.error(f"💀 패배... 몬스터의 반격에 부상을 입고 후퇴했습니다. (-{penalty:,} G)")
+
+    if st.button("돌아가기", use_container_width=True):
+        safe_rerun()
+
+# --- 🖥️ 메인 대시보드 UI ---
+st.markdown("<h1 class='game-title'>⚔️ HERO RPG: OVERLOAD ⚔️</h1>", unsafe_allow_html=True)
+
+# 사이드바: 옵션 & 상점
+with st.sidebar:
+    st.header("⚙️ 히어로 프로필")
+    new_name = st.text_input("히어로 이름", value=st.session_state.hero_name)
+    if new_name != st.session_state.hero_name:
+        st.session_state.hero_name = new_name
+        safe_rerun()
+        
+    st.markdown("---")
+    st.header("🛒 상점 & 소모품")
+    st.write(f"📜 파괴 방지권: **{st.session_state.protection_scrolls}개**")
+    if st.button("📜 방지권 구매 (3,000G)"):
+        buy_protection()
+
+# 최상단 메트릭 스탯
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("💰 보유 골드", f"{st.session_state.gold:,} G")
+m2.metric("⚔️ 총 공격력", f"{get_total_atk():,} ATK")
+m3.metric("🦸 히어로", f"Lv.{st.session_state.hero_level}")
+m4.metric("🛡️ 무기 강화", f"+{st.session_state.weapon_lvl}")
+
+st.markdown("---")
+
+# 히어로 & 무기 쇼케이스 카드
+col_hero, col_weapon = st.columns(2)
+
+with col_hero:
+    st.markdown(f"""
+        <div class='hero-card'>
+            <div style='color:#00f0ff; font-weight:bold; font-size:0.85rem;'>HERO STATS</div>
+            <div class='art-avatar'>🦸‍♂️</div>
+            <div style='font-size:1.4rem; font-weight:bold; color:#fff;'>{st.session_state.hero_name}</div>
+            <div style='margin:8px 0;'>순수 공격력: <b>{get_hero_atk()}</b></div>
+            <div style='color:#00f0ff; font-size:0.95rem;'>훈련 비용: <b>{get_h_cost():,} G</b></div>
+        </div>
+    """, unsafe_allow_html=True)
+    st.write("")
+    if st.button("💪 히어로 스탯 훈련"):
+        enhance_hero()
+
+with col_weapon:
+    w_info = WEAPON_DATA[st.session_state.weapon_tier]
+    st.markdown(f"""
+        <div class='weapon-card'>
+            <div style='color:#ff007f; font-weight:bold; font-size:0.85rem;'>EQUIPPED WEAPON</div>
+            <div class='art-avatar'>{w_info['art']}</div>
+            <div style='font-size:1.4rem; font-weight:bold; color:#fff;'>+{st.session_state.weapon_lvl} {w_info['name']}</div>
+            <div style='margin:8px 0;'>무기 공격력: <b>{get_weapon_atk()}</b></div>
+            <div style='color:#ff007f; font-size:0.95rem;'>성공률: <b>{get_w_rate()}%</b> | 비용: <b>{get_w_cost():,} G</b></div>
+        </div>
+    """, unsafe_allow_html=True)
+    st.write("")
+    if st.button("🔨 무기 초월 강화"):
+        enhance_weapon()
+
+st.markdown("---")
+
+# 👹 사냥터 및 액션 파트
+st.subheader("👹 아레나 던전 탐험")
+act_col1, act_col2 = st.columns(2)
+
+with act_col1:
+    if st.button("⚔️ 던전 사냥 입장", use_container_width=True):
+        start_battle_modal()
+
+with act_col2:
+    if st.button("🔄 게임 데이터 리셋", use_container_width=True):
+        init_game()
+        safe_rerun()
+
+# 활동 기록 로그
+with st.expander("📜 모험 기록 일지", expanded=True):
+    for log in reversed(st.session_state.log[-6:]):
+        st.write(log)
