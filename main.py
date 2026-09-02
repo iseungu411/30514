@@ -2,8 +2,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 import time
 
-st.set_page_config(page_title="TJ PERFECT SCORE KARAOKE", page_icon="🎤", layout="wide")
+# 페이지 설정
+st.set_page_config(page_title="PERFECT SCORE KARAOKE", page_icon="🎤", layout="wide")
 
+# 세션 상태 초기화
 if "coins" not in st.session_state:
     st.session_state.coins = 0
 if "queue" not in st.session_state:
@@ -11,38 +13,39 @@ if "queue" not in st.session_state:
 if "current_song" not in st.session_state:
     st.session_state.current_song = None
 
-# 인터넷 연결 없이 100% 자체 재생되는 동요 데이터베이스 (주파수 멜로디 패턴)
+# 웹 오류 발생 제로! 100% 내장 신디사이저 반주 데이터베이스
 CHILDREN_SONGS = {
     "🐻 [동요] 곰 세 마리 (TJ 1001)": {
         "tj_num": "1001",
         "notes": [261, 261, 261, 261, 261, 329, 392, 392, 329, 261, 392, 392, 329, 392, 392, 329],
-        "bpm": 120
+        "tempo": 400
     },
     "✈️ [동요] 비행기 (TJ 1002)": {
         "tj_num": "1002",
         "notes": [329, 293, 261, 293, 329, 329, 329, 293, 293, 293, 329, 392, 392],
-        "bpm": 110
+        "tempo": 450
     },
     "⭐ [동요] 작은 별 (TJ 1003)": {
         "tj_num": "1003",
         "notes": [261, 261, 392, 392, 440, 440, 392, 349, 349, 329, 329, 293, 293, 261],
-        "bpm": 100
+        "tempo": 500
     },
     "🔔 [동요] 학교 종 (TJ 1004)": {
         "tj_num": "1004",
         "notes": [392, 392, 440, 440, 392, 392, 329, 392, 392, 329, 329, 293],
-        "bpm": 115
+        "tempo": 420
     },
     "🦋 [동요] 나비야 (TJ 1005)": {
         "tj_num": "1005",
         "notes": [392, 329, 329, 349, 293, 293, 261, 293, 329, 349, 392, 392, 392],
-        "bpm": 105
+        "tempo": 450
     }
 }
 
+# 스타일링
 st.markdown("""
 <style>
-    .stApp { background-color: #040212; color: #ffffff; }
+    .stApp { background-color: #050314; color: #ffffff; }
     .coin-badge {
         background: linear-gradient(135deg, #10b981, #047857);
         padding: 16px; border-radius: 14px; text-align: center;
@@ -52,65 +55,65 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎤 PERFECT SCORE CHILD SONG KARAOKE 🪙")
+st.title("🎤 PERFECT SCORE AI KARAOKE SYSTEM 🪙")
+st.caption("수행평가용 코인노래방 알바 & TJ 퍼펙트스코어 가창 시뮬레이터")
 
 col_left, col_right = st.columns([1.1, 2])
 
-# 알바 및 예약 영역
+# 1. 알바 및 노래 예약 영역
 with col_left:
     st.subheader("💰 코인노래방 알바센터")
     st.markdown(f'<div class="coin-badge">보유 코인: {st.session_state.coins} 코인</div>', unsafe_allow_html=True)
     st.write("")
-    st.caption("🛠️ 알바 미션을 완료해서 코인을 버세요!")
     
-    t1, t2, t3 = st.tabs(["🧹 방 청소", "🥤 음료 채우기", "🛎️ 잔돈 계산"])
+    t1, t2, t3 = st.tabs(["🧹 방 청소", "🥤 음료 채우기", "🛎️ 계산하기"])
     
     with t1:
-        st.write("**3번 방 마이크 소독 및 테이블 닦기**")
-        if st.button("🧹 방 청소 시작 (1코인)", use_container_width=True):
-            with st.spinner("소독제 뿌리고 닦는 중..."):
-                time.sleep(1)
+        st.write("**방 청소 후 소독 작업을 진행하세요.**")
+        if st.button("🧹 방 청소 완료 (+1코인)", use_container_width=True):
+            with st.spinner("청소 중..."):
+                time.sleep(0.5)
             st.session_state.coins += 1
-            st.success("청소 완료! 1코인 지급 완료 🪙")
+            st.success("1코인 획득!")
             st.rerun()
 
     with t2:
-        st.write("**쇼케이스 냉장고 음료 채우기**")
-        drink = st.radio("채울 음료", ["식혜", "포카리스웨트", "갈아만든 배"])
-        if st.button("🥤 냉장고 채우기 (1코인)", use_container_width=True):
+        st.write("**냉장고 음료를 정렬하세요.**")
+        drink = st.selectbox("선택", ["식혜", "이온음료", "탄산수"])
+        if st.button("🥤 채우기 완료 (+1코인)", use_container_width=True):
             st.session_state.coins += 1
-            st.success(f"{drink} 채우기 완료! 1코인 지급 🪙")
+            st.success(f"{drink} 채우기 완료! 1코인 획득!")
             st.rerun()
 
     with t3:
-        st.write("**손님이 10,000원 지불. 500원 동전 개수는?**")
-        ans = st.number_input("동전 수 입력", min_value=0, max_value=30, value=0)
-        if st.button("🛎️ 거스름돈 전달 (2코인)", use_container_width=True):
-            if ans == 20:
+        st.write("**5,000원 지불 시 500원 동전 개수는?**")
+        ans = st.number_input("개수 입력", min_value=0, max_value=20, value=0)
+        if st.button("🛎️ 거스름돈 전달 (+2코인)", use_container_width=True):
+            if ans == 10:
                 st.session_state.coins += 2
-                st.success("정답! 2코인 지급 완료 🪙🪙")
+                st.success("정답! 2코인 획득!")
                 st.rerun()
             else:
-                st.error("계산이 틀렸습니다! (10,000원 = 500원 x 20개)")
+                st.error("오답입니다! (5,000원 = 500원 x 10개)")
 
     st.divider()
 
-    st.subheader("🎶 동요 예약하기")
-    selected_song_key = st.selectbox("수록 동요 목록", list(CHILDREN_SONGS.keys()))
+    st.subheader("🎶 노래 예약하기")
+    selected_song_key = st.selectbox("수록곡 선택", list(CHILDREN_SONGS.keys()))
 
     if st.button("📌 곡 예약하기 (1코인 차감)", use_container_width=True):
         if st.session_state.coins <= 0:
-            st.error("코인이 없습니다! 알바를 해서 코인을 버세요.")
+            st.error("코인이 부족합니다! 알바를 먼저 해주세요.")
         else:
             song_data = CHILDREN_SONGS[selected_song_key]
             st.session_state.queue.append({
                 "title": selected_song_key,
                 "tj_num": song_data["tj_num"],
                 "notes": song_data["notes"],
-                "bpm": song_data["bpm"]
+                "tempo": song_data["tempo"]
             })
             st.session_state.coins -= 1
-            st.success("예약되었습니다!")
+            st.success("곡이 예약되었습니다!")
             st.rerun()
 
     st.subheader("📋 대기 목록")
@@ -120,9 +123,9 @@ with col_left:
     else:
         st.caption("예약된 곡이 없습니다.")
 
-# TJ 퍼펙트스코어 무대
+# 2. 퍼펙트 스코어 2D 메인 무대
 with col_right:
-    st.subheader("📺 퍼펙트 스코어 2D 가창 모니터")
+    st.subheader("📺 TJ 퍼펙트스코어 2D 모니터")
 
     if not st.session_state.current_song and st.session_state.queue:
         st.session_state.current_song = st.session_state.queue.pop(0)
@@ -165,8 +168,9 @@ with col_right:
                     border: 1px solid #6366f1; margin-top: 10px; text-align: center;
                 }}
                 button {{
-                    background: #38bdf8; color: #000; border: none; padding: 10px 20px;
-                    font-weight: bold; font-size: 16px; border-radius: 8px; cursor: pointer;
+                    background: #38bdf8; color: #000; border: none; padding: 12px 24px;
+                    font-weight: bold; font-size: 17px; border-radius: 8px; cursor: pointer;
+                    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
                 }}
                 button:hover {{ background: #0284c7; color: #fff; }}
             </style>
@@ -183,7 +187,7 @@ with col_right:
             </div>
 
             <div class="controls">
-                <button id="start-btn" onclick="startAudioEngine()">▶️ 동요 MR 반주 재생 시작</button>
+                <button id="start-btn" onclick="startAudioEngine()">▶️ 동요 MR 반주 시작하기</button>
             </div>
 
             <script>
@@ -193,6 +197,7 @@ with col_right:
                 canvas.height = canvas.offsetHeight;
 
                 const notes = {song['notes']};
+                const tempo = {song['tempo']};
                 let audioCtx, analyser, isPlaying = false;
                 let userPitch = 0;
                 let score = 100.0;
@@ -208,7 +213,6 @@ with col_right:
 
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     
-                    // 마이크 연결
                     try {{
                         analyser = audioCtx.createAnalyser();
                         analyser.fftSize = 2048;
@@ -219,7 +223,7 @@ with col_right:
                     playMelodySynth();
                 }}
 
-                // 외부 mp3 대신 브라우저가 자체 합성하는 동요 반주 엔진
+                // 내장 오디오 오실레이터 반주 엔진
                 function playMelodySynth() {{
                     if (!isPlaying) return;
                     let freq = notes[noteIdx % notes.length];
@@ -230,17 +234,17 @@ with col_right:
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
                     
-                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
 
                     osc.start();
-                    osc.stop(audioCtx.currentTime + 0.4);
+                    osc.stop(audioCtx.currentTime + 0.35);
 
                     noteIdx++;
-                    setTimeout(playMelodySynth, 450);
+                    setTimeout(playMelodySynth, tempo);
                 }}
 
                 function detectMicPitch() {{
@@ -256,14 +260,14 @@ with col_right:
                 function drawTJScores() {{
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    // 1. 가이드 라인
+                    // 1. 배경선
                     ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
                     ctx.lineWidth = 1;
                     for (let y = 20; y < canvas.height; y += 30) {{
                         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
                     }}
 
-                    // 2. TJ 동요 퍼펙트스코어 노트 바
+                    // 2. 노트 바
                     const barWidth = canvas.width / notes.length;
                     let currentTargetY = 0;
 
@@ -271,7 +275,7 @@ with col_right:
                         const bx = i * barWidth;
                         const by = canvas.height - ((notes[i] - 150) / 350 * canvas.height);
                         
-                        ctx.fillStyle = "rgba(250, 204, 21, 0.75)";
+                        ctx.fillStyle = "rgba(250, 204, 21, 0.85)";
                         ctx.fillRect(bx + 2, by - 6, barWidth - 4, 12);
                         ctx.strokeStyle = "#facc15";
                         ctx.strokeRect(bx + 2, by - 6, barWidth - 4, 12);
@@ -288,7 +292,7 @@ with col_right:
                     ctx.moveTo(scanX, 0); ctx.lineTo(scanX, canvas.height);
                     ctx.stroke();
 
-                    // 4. 마이크 음정 판정
+                    // 4. 실시간 음정 판정
                     userPitch = detectMicPitch();
                     const pitchEl = document.getElementById('pitch-val');
                     const judgeEl = document.getElementById('judge-box');
@@ -319,7 +323,7 @@ with col_right:
                         pitchEl.innerText = "--- Hz";
                     }}
 
-                    // 5. 음정 궤적
+                    // 5. 음정 궤적 핑크 파동
                     ctx.strokeStyle = "#ec4899";
                     ctx.lineWidth = 4;
                     ctx.beginPath();
@@ -344,8 +348,8 @@ with col_right:
         components.html(perfect_score_html, height=360)
 
         st.write("")
-        if st.button("⏭️ 다음 곡으로 넘기기 (간주 점프)", use_container_width=True):
+        if st.button("⏭️ 다음 곡으로 넘기기", use_container_width=True):
             st.session_state.current_song = None
             st.rerun()
     else:
-        st.warning("알바를 해서 코인을 채운 후, 동요를 예약해 보세요!")
+        st.warning("👈 왼쪽 알바센터에서 코인을 번 후 동요를 예약해 보세요!")
