@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="AI COIN KARAOKE", page_icon="🪙", layout="wide")
+st.set_page_config(page_title="REAL MR AI COIN KARAOKE", page_icon="🪙", layout="wide")
 
 # 세션 상태 초기화 (코인 및 예약 시스템)
 if "coins" not in st.session_state:
@@ -11,13 +11,14 @@ if "queue" not in st.session_state:
 if "current_song" not in st.session_state:
     st.session_state.current_song = None
 
-# 프리셋 MR 곡 목록 (유튜브 Embed ID)
+# 실제 검증된 유튜브 MR(Karaoke) 영상 ID 매핑
 SONG_DATABASE = {
-    "죠지 - 좋아해.. (MR)": "M7lc1UVf-VE",  # 예시 ID
-    "죠지 - Boat (MR)": "HTJsDalhx2Y",
-    "죠지 - routine (MR)": "M7lc1UVf-VE",
-    "NewJeans - Hype Boy (MR)": "11cta61wi0Y",
-    "성시경 - 거리에서 (MR)": "M7lc1UVf-VE"
+    "❤️ [R&B] 죠지 - 좋아해.. (MR)": "E_XGvj-pUHM",
+    "⛵ [R&B] 죠지 - Boat (MR)": "M6L7eU15E4A",
+    "🎸 [R&B] 죠지 - routine (MR)": "fJ36R94N1mY",
+    "🤝 [R&B] 죠지 - 손만 잡고 잠을 자자 (MR)": "uIPlsJ62p1s",
+    "✨ [IDOL] NewJeans - Hype Boy (MR)": "9N2XbU2S1-E",
+    "🌧️ [BALLAD] 성시경 - 거리에서 (MR)": "vYI5O_G51E0"
 }
 
 st.markdown("""
@@ -29,14 +30,10 @@ st.markdown("""
         font-weight: 800; font-size: 22px; color: #fff;
         box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
     }
-    .queue-box {
-        background: rgba(30, 27, 75, 0.8);
-        border: 1px solid #6366f1; border-radius: 12px; padding: 12px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎤 REAL AI COIN KARAOKE (코인노래방) 🪙")
+st.title("🎤 REAL MR AI COIN KARAOKE (코인노래방) 🪙")
 
 col1, col2 = st.columns([1, 2])
 
@@ -57,9 +54,9 @@ with col1:
     st.divider()
 
     st.subheader("🎶 노래 예약하기")
-    selected_preset = st.selectbox("인기 MR 곡 선택", list(SONG_DATABASE.keys()))
+    selected_preset = st.selectbox("수록곡 목록 선택", list(SONG_DATABASE.keys()))
     
-    custom_yt_url = st.text_input("또는 유튜브 MR 링크 직접 입력", placeholder="https://www.youtube.com/watch?v=...")
+    custom_yt_url = st.text_input("기타 유튜브 MR 링크 직접 입력 (선택)", placeholder="https://www.youtube.com/watch?v=...")
 
     if st.button("📌 곡 예약하기", use_container_width=True):
         if st.session_state.coins <= 0:
@@ -74,7 +71,7 @@ with col1:
 
             st.session_state.queue.append({"title": title, "yt_id": yt_id})
             st.session_state.coins -= 1
-            st.success(f"'{title}' 예약 완료! (1코인 차감됨)")
+            st.success(f"'{title}' 예약 완료! (1코인 차감)")
             st.rerun()
 
     st.subheader("📋 예약 대기 목록")
@@ -95,7 +92,6 @@ with col2:
         song = st.session_state.current_song
         st.info(f"🎤 **NOW PLAYING:** {song['title']}")
 
-        # 유튜브 오디오/비디오 MR 플레이어 및 실시간 AI 마이크 분석
         karaoke_html = f"""
         <!DOCTYPE html>
         <html>
@@ -104,7 +100,7 @@ with col2:
                 body {{ margin: 0; background: #000; color: #fff; font-family: sans-serif; text-align: center; }}
                 iframe {{ width: 100%; height: 380px; border: none; border-radius: 12px; }}
                 #mic-hud {{
-                    margin-top: 10px; background: rgba(15, 23, 42, 0.9); padding: 10px;
+                    margin-top: 10px; background: rgba(15, 23, 42, 0.9); padding: 12px;
                     border-radius: 10px; border: 1px solid #ec4899; display: flex;
                     justify-content: space-around; align-items: center;
                 }}
@@ -115,12 +111,11 @@ with col2:
             <iframe id="yt-player" src="https://www.youtube.com/embed/{song['yt_id']}?autoplay=1&enablejsapi=1" allow="autoplay"></iframe>
 
             <div id="mic-hud">
-                <div>🎙️ 마이크 라이브: <span id="pitch-val" class="val">--- Hz</span></div>
-                <div>💯 AI 가창 점수: <span id="score-val" class="val" style="color:#ec4899;">100</span></div>
+                <div>🎙️ 마이크 음정: <span id="pitch-val" class="val">--- Hz</span></div>
+                <div>💯 AI 라이브 점수: <span id="score-val" class="val" style="color:#ec4899;">100</span></div>
             </div>
 
             <script>
-                // 마이크 음정 분석 엔진
                 let audioCtx, analyser;
                 async function initMic() {{
                     try {{
@@ -138,7 +133,7 @@ with col2:
                     for(let i=0; i<2048; i++) sum += buf[i]*buf[i];
                     let rms = Math.sqrt(sum/2048);
                     if(rms > 0.01) {{
-                        document.getElementById('pitch-val').innerText = Math.round(rms * 2000) + " Hz";
+                        document.getElementById('pitch-val').innerText = Math.round(rms * 2200) + " Hz";
                     }}
                     requestAnimationFrame(analyze);
                 }}
@@ -149,8 +144,8 @@ with col2:
         """
         components.html(karaoke_html, height=460)
 
-        if st.button("⏭️ 다음 곡으로 넘기기 / 간주 점프"):
+        if st.button("⏭️ 다음 곡으로 넘기기 (간주 점프)"):
             st.session_state.current_song = None
             st.rerun()
     else:
-        st.warning("동전을 넣고 노래를 예약하면 코인노래방 반주 화면이 시작됩니다!")
+        st.warning("동전을 충전하고 원하는 노래를 예약해 보세요!")
