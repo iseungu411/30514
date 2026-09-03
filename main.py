@@ -5,7 +5,7 @@ import time
 
 st.set_page_config(page_title="NEON RPG: OVERDRIVE BATTLE", page_icon="⚔️", layout="centered")
 
-# --- 🎨 Ultra High Quality Cyberpunk & Neon Background CSS ---
+# --- 🎨 Cyberpunk & Neon Design CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Noto+Sans+KR:wght@500;700;900&display=swap');
@@ -22,7 +22,7 @@ st.markdown("""
     .game-title {
         font-family: 'Orbitron', sans-serif;
         text-align: center;
-        font-size: 3rem;
+        font-size: 2.8rem;
         font-weight: 900;
         letter-spacing: 3px;
         background: linear-gradient(180deg, #00f0ff 0%, #ff007f 100%);
@@ -92,7 +92,7 @@ def safe_rerun():
     if hasattr(st, "rerun"): st.rerun()
     elif hasattr(st, "experimental_rerun"): st.experimental_rerun()
 
-# --- 🎨 SVG High Quality Graphics ---
+# --- 🎨 SVG Graphic Elements ---
 HERO_SVGS = [
     '''<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="35" r="20" fill="#ffcc99"/><path d="M 20 90 Q 50 50 80 90" fill="#78909C"/><circle cx="43" cy="32" r="3" fill="#000"/><circle cx="57" cy="32" r="3" fill="#000"/></svg>''',
     '''<svg width="100" height="100" viewBox="0 0 100 100"><path d="M 25 20 L 75 20 L 70 85 L 50 95 L 30 85 Z" fill="#37474F" stroke="#00f0ff" stroke-width="2"/><rect x="35" y="35" width="30" height="8" fill="#00f0ff"/></svg>''',
@@ -189,11 +189,14 @@ def enhance_hero():
     st.toast(f"🦸 레벨 업! (Lv.{st.session_state.hero_level})", icon="💪")
     safe_rerun()
 
-# 🎨 2D Canvas 실시간 애니메이션 연출 HTML 생성 함수
-def render_canvas_battle(hero_name, monster_name, is_ultimate, damage, is_hero_turn, action_text):
+# 🎨 [동적 고품질 Canvas 애니메이션 엔진]
+def render_canvas_battle(hero_name, monster_name, monster_tier, is_ultimate, damage, is_hero_turn, hero_level):
+    is_boss = (monster_tier >= 3)  # 4단계 이상부터 고난도 보스 이펙트 적용
+    is_high_hero = (hero_level >= 7)
+
     html_code = f"""
     <div style="text-align: center;">
-        <canvas id="battleCanvas" width="600" height="220" style="border-radius:15px; border:2px solid #00f0ff; background: linear-gradient(180deg, #10002b 0%, #030008 100%); box-shadow: 0 0 20px rgba(0,240,255,0.4);"></canvas>
+        <canvas id="battleCanvas" width="600" height="230" style="border-radius:15px; border:2px solid { "#ff0055" if is_boss else "#00f0ff" }; background: linear-gradient(180deg, #10002b 0%, #030008 100%); box-shadow: 0 0 25px { "rgba(255, 0, 85, 0.6)" if is_boss else "rgba(0, 240, 255, 0.4)" };"></canvas>
     </div>
     <script>
     (function() {{
@@ -201,71 +204,112 @@ def render_canvas_battle(hero_name, monster_name, is_ultimate, damage, is_hero_t
         const ctx = canvas.getContext('2d');
         let frame = 0;
         
-        let heroX = 80;
-        let monsterX = 480;
-        let heroColor = '#00f0ff';
-        let monsterColor = '#ff007f';
-        let effectColor = '{ "#ff007f" if is_ultimate else "#00f0ff" }';
+        let heroX = 90;
+        let monsterX = 470;
+        let isBoss = { 'true' if is_boss else 'false' };
+        let isHighHero = { 'true' if is_high_hero else 'false' };
+        let monsterTier = {monster_tier};
         
         function animate() {{
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Grid Background
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+            // 🌌 배경 사이버네틱 그리드 연출
+            ctx.strokeStyle = isBoss ? 'rgba(255, 0, 100, 0.15)' : 'rgba(0, 240, 255, 0.12)';
             ctx.lineWidth = 1;
             for(let x=0; x<canvas.width; x+=30) {{ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }}
             for(let y=0; y<canvas.height; y+=30) {{ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }}
             
-            // Turn Logic Animation
             let hX = heroX;
             let mX = monsterX;
             let strike = false;
             
+            // 이동 애니메이션 계산
             if ({ 'true' if is_hero_turn else 'false' }) {{
-                if (frame < 12) hX += frame * 18;
-                else if (frame < 22) {{ hX = 380; strike = true; mX += Math.sin(frame)*10; }}
-                else hX -= (frame - 22) * 18;
+                if (frame < 12) hX += frame * 17;
+                else if (frame < 22) {{ hX = 370; strike = true; mX += Math.sin(frame)*12; }}
+                else hX -= (frame - 22) * 17;
             }} else {{
-                if (frame < 12) mX -= frame * 18;
-                else if (frame < 22) {{ mX = 180; strike = true; hX += Math.sin(frame)*10; }}
-                else mX += (frame - 22) * 18;
+                if (frame < 12) mX -= frame * 17;
+                else if (frame < 22) {{ mX = 190; strike = true; hX += Math.sin(frame)*12; }}
+                else mX += (frame - 22) * 17;
             }}
             
-            // Draw Hero (Left)
-            ctx.fillStyle = heroColor;
-            ctx.shadowColor = heroColor;
-            ctx.shadowBlur = 15;
-            ctx.beginPath(); ctx.arc(hX, 120, 25, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 20, 160);
+            // 🦸 1. 용사 캐릭터 연출 (티어에 따른 오라 차이)
+            ctx.save();
+            if (isHighHero) {{
+                // 영웅/신화 티어: 황금빛 아우라
+                ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 20;
+                ctx.beginPath(); ctx.arc(hX, 120, 32 + Math.sin(frame*0.3)*3, 0, Math.PI*2); ctx.stroke();
+            }}
+            ctx.fillStyle = isHighHero ? '#00ffff' : '#00f0ff';
+            ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 15;
+            ctx.beginPath(); ctx.arc(hX, 120, 24, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 25, 168);
+            ctx.restore();
             
-            // Draw Monster (Right)
-            ctx.fillStyle = monsterColor;
-            ctx.shadowColor = monsterColor;
-            ctx.shadowBlur = 15;
-            ctx.beginPath(); ctx.rect(mX - 25, 95, 50, 50); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 25, 160);
-            
-            // Draw Attack Slash & Effect
-            if (strike) {{
-                ctx.strokeStyle = effectColor;
-                ctx.shadowColor = effectColor;
-                ctx.shadowBlur = 25;
-                ctx.lineWidth = { 8 if is_ultimate else 4 };
+            // 👹 2. 몬스터 캐릭터 연출 (강한 몬스터일수록 웅장한 아우라 및 회전 마법진)
+            ctx.save();
+            if (isBoss) {{
+                // 🔴 보스급: 회전하는 멸망의 마법진 & 거대 붉은 아우라
+                let auraSize = 35 + monsterTier * 3;
+                ctx.strokeStyle = '#ff0055'; ctx.lineWidth = 3; ctx.shadowColor = '#ff0055'; ctx.shadowBlur = 25;
+                ctx.beginPath(); ctx.arc(mX, 120, auraSize + Math.sin(frame*0.4)*5, 0, Math.PI*2); ctx.stroke();
+                
+                // 마법진 오각성 회전
+                ctx.strokeStyle = 'rgba(255, 0, 100, 0.4)';
                 ctx.beginPath();
+                for(let i=0; i<5; i++) {{
+                    let ang = (frame*0.05) + (i * Math.PI * 2 / 5);
+                    let rx = mX + Math.cos(ang) * (auraSize + 10);
+                    let ry = 120 + Math.sin(ang) * (auraSize + 10);
+                    if(i===0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
+                }}
+                ctx.closePath(); ctx.stroke();
+            }}
+            
+            // 몬스터 본체
+            ctx.fillStyle = isBoss ? '#ff0055' : '#a100ff';
+            ctx.shadowColor = isBoss ? '#ff0055' : '#a100ff'; ctx.shadowBlur = 15;
+            let boxSize = 46 + monsterTier * 2;
+            ctx.fillRect(mX - boxSize/2, 120 - boxSize/2, boxSize, boxSize);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 30, 168);
+            ctx.restore();
+            
+            // ⚔️ 3. 공격 & 타격 스킬 화려한 이펙트 연출
+            if (strike) {{
+                ctx.save();
                 if ({ 'true' if is_hero_turn else 'false' }) {{
-                    ctx.moveTo(mX - 40, 70); ctx.lineTo(mX + 40, 150);
+                    // 용사의 공격
                     if ({ 'true' if is_ultimate else 'false' }) {{
-                        ctx.moveTo(mX + 40, 70); ctx.lineTo(mX - 40, 150);
+                        // 🔥 4번째 턴 [필살 차원참]: 3중 네온 십자 검격 & 화면 붉은 섬광
+                        ctx.strokeStyle = '#ff007f'; ctx.shadowColor = '#ff007f'; ctx.shadowBlur = 30; ctx.lineWidth = 9;
+                        ctx.beginPath(); ctx.moveTo(mX - 50, 70); ctx.lineTo(mX + 50, 170); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(mX + 50, 70); ctx.lineTo(mX - 50, 170); ctx.stroke();
+                        ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 5;
+                        ctx.beginPath(); ctx.moveTo(mX - 60, 120); ctx.lineTo(mX + 60, 120); ctx.stroke();
+                    }} else {{
+                        // 일반 검격
+                        ctx.strokeStyle = '#00f0ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 15; ctx.lineWidth = 5;
+                        ctx.beginPath(); ctx.moveTo(mX - 40, 80); ctx.lineTo(mX + 40, 160); ctx.stroke();
                     }}
                 }} else {{
-                    ctx.moveTo(hX + 40, 70); ctx.lineTo(hX - 40, 150);
+                    // 몬스터의 공격 (강한 몬스터일수록 거대한 폭발 이펙트)
+                    if (isBoss) {{
+                        ctx.strokeStyle = '#ff0000'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 35; ctx.lineWidth = 10;
+                        ctx.beginPath(); ctx.arc(hX, 120, 45, 0, Math.PI*2); ctx.stroke();
+                        ctx.fillStyle = 'rgba(255,0,0,0.3)'; ctx.fill();
+                    }} else {{
+                        ctx.strokeStyle = '#ff007f'; ctx.shadowColor = '#ff007f'; ctx.shadowBlur = 15; ctx.lineWidth = 5;
+                        ctx.beginPath(); ctx.moveTo(hX + 30, 80); ctx.lineTo(hX - 30, 160); ctx.stroke();
+                    }}
                 }}
-                ctx.stroke();
                 
-                // Damage Text
-                ctx.fillStyle = '#ffff00';
-                ctx.font = 'bold 24px Orbitron';
-                ctx.fillText('-{damage:,}', strike ? ( { 'mX' if is_hero_turn else 'hX' } ) : 0, 60);
+                // 데미지 폰트 텍스트 연출
+                ctx.fillStyle = isBoss && !{ 'true' if is_hero_turn else 'false' } ? '#ff0000' : '#ffff00';
+                ctx.font = 'bold 26px Orbitron';
+                let txtX = { 'mX' if is_hero_turn else 'hX' };
+                ctx.fillText('-{damage:,}', txtX - 25, 55);
+                ctx.restore();
             }}
             
             frame++;
@@ -304,9 +348,9 @@ with col_weapon:
 
 st.markdown("---")
 
-# --- 👹 2D CANVAS 애니메이션 전투 아레나 ---
+# --- 👹 2D CANVAS 실시간 격투 아레나 ---
 st.subheader("⚔️ 괴물 실시간 격투 아레나")
-st.info("💡 **전투 규칙**: 3회 공격 후 **4번째 턴 [🔥 필살 차원참 (2.5배)]**이 자동 발동되며 캔버스에 타격 액션 연출이 출력됩니다!")
+st.info("🔥 **티어 비주얼 연출**: 고단 보스 몬스터일수록 **회전 마법진과 거대 아우라**가 발동하며, 용사 레벨 상승 시 **황금 오라 및 필살 3중 차원참 연출**이 펼쳐집니다!")
 
 skip_battle = st.checkbox("⏩ 전투 연출 SKIP (결과 즉시 계산)", value=False)
 
@@ -348,12 +392,12 @@ if st.button("⚡ 전투 개시!", use_container_width=True):
         # 1. 용사의 공격
         if is_ultimate:
             atk_mult = 2.5
-            skill_name = "💥 **[필살 차원참]**"
-            if not skip_battle: status_display.markdown("<h3 style='text-align:center; color:#ff007f;'>🔥 [4번째 턴] 필살 차원참 장전 및 격파!!</h3>", unsafe_allow_html=True)
+            skill_name = "💥 **[필살 3중 차원참]**"
+            if not skip_battle: status_display.markdown("<h3 style='text-align:center; color:#ff007f;'>🔥 [4번째 턴] 필살 차원참 장전 및 십자 격파!!</h3>", unsafe_allow_html=True)
         else:
             atk_mult = 1.0
-            skill_name = "🗡️ **[기본 베기]**"
-            if not skip_battle: status_display.markdown(f"<h4 style='text-align:center; color:#00f0ff;'>🗡️ [{turn % 4}/3번째 턴] 용사의 기본 검격!</h4>", unsafe_allow_html=True)
+            skill_name = "🗡️ **[기본 검격]**"
+            if not skip_battle: status_display.markdown(f"<h4 style='text-align:center; color:#00f0ff;'>🗡️ [{turn % 4}/3번째 턴] 용사의 기본 공격!</h4>", unsafe_allow_html=True)
         
         is_crit = random.random() < 0.25
         crit_mult = 1.5 if is_crit else 1.0
@@ -366,9 +410,9 @@ if st.button("⚡ 전투 개시!", use_container_width=True):
         if not skip_battle:
             monster_bar.progress(monster_hp / monster['hp'], text=f"HP: {monster_hp:,} / {monster['hp']:,}")
             with canvas_box:
-                components.html(render_canvas_battle(st.session_state.hero_name, monster['name'], is_ultimate, damage_to_monster, True, skill_name), height=230)
+                components.html(render_canvas_battle(st.session_state.hero_name, monster['name'], m_idx, is_ultimate, damage_to_monster, True, st.session_state.hero_level), height=240)
             battle_log_box.markdown("<div class='battle-log-text'>" + "<br>".join(battle_logs[-4:]) + "</div>", unsafe_allow_html=True)
-            time.sleep(0.8)
+            time.sleep(0.85)
             
         if monster_hp <= 0:
             break
@@ -385,13 +429,13 @@ if st.button("⚡ 전투 개시!", use_container_width=True):
         if not skip_battle:
             hero_bar.progress(hero_hp / get_max_hp(), text=f"HP: {hero_hp:,} / {get_max_hp():,}")
             with canvas_box:
-                components.html(render_canvas_battle(st.session_state.hero_name, monster['name'], False, damage_to_hero, False, m_skill_text), height=230)
+                components.html(render_canvas_battle(st.session_state.hero_name, monster['name'], m_idx, False, damage_to_hero, False, st.session_state.hero_level), height=240)
             battle_log_box.markdown("<div class='battle-log-text'>" + "<br>".join(battle_logs[-4:]) + "</div>", unsafe_allow_html=True)
-            time.sleep(0.8)
+            time.sleep(0.85)
             
         turn += 1
 
-    # SKIP 일 때 화면 일괄 출력
+    # SKIP 모드 시 최종 결과 및 로그 일괄 출력
     if skip_battle:
         hero_bar.progress(hero_hp / get_max_hp(), text=f"HP: {hero_hp:,} / {get_max_hp():,}")
         monster_bar.progress(monster_hp / monster['hp'], text=f"HP: {monster_hp:,} / {monster['hp']:,}")
