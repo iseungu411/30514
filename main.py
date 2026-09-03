@@ -104,7 +104,6 @@ def safe_rerun():
 
 # --- ⚔️ 무기 SVG 라이브러리 ---
 WEAPON_SVGS = [
-    # 0. 단검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs><linearGradient id="g0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b0bec5"/><stop offset="100%" stop-color="#37474f"/></linearGradient></defs>
         <path d="M50 15 L56 60 L50 65 L44 60 Z" fill="url(#g0)" stroke="#102027" stroke-width="1.5"/>
@@ -112,7 +111,6 @@ WEAPON_SVGS = [
         <rect x="47" y="69" width="6" height="18" fill="#37474f"/>
         <circle cx="50" cy="89" r="4" fill="#78909c"/>
     </svg>''',
-    # 1. 장검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e0e0e0"/><stop offset="50%" stop-color="#9e9e9e"/><stop offset="100%" stop-color="#424242"/></linearGradient></defs>
         <path d="M50 8 L57 65 L50 72 L43 65 Z" fill="url(#g1)" stroke="#212121" stroke-width="1.5"/>
@@ -120,7 +118,6 @@ WEAPON_SVGS = [
         <path d="M35 72 L65 72 L50 78 Z" fill="#757575"/>
         <rect x="47" y="78" width="6" height="16" fill="#212121"/>
     </svg>''',
-    # 2. 룬 각인검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#1a237e"/></linearGradient>
@@ -131,7 +128,6 @@ WEAPON_SVGS = [
         <polygon points="32,70 68,70 50,78" fill="#00b0ff" filter="url(#f2)"/>
         <circle cx="50" cy="40" r="4" fill="#ffffff" filter="url(#f2)"/>
     </svg>''',
-    # 3. 엘프의 명검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b9f6ca"/><stop offset="50%" stop-color="#00e676"/><stop offset="100%" stop-color="#1b5e20"/></linearGradient>
@@ -141,7 +137,6 @@ WEAPON_SVGS = [
         <path d="M35 68 C45 68 45 78 50 82 C55 78 55 68 65 68 C55 74 45 74 35 68 Z" fill="#00e676"/>
         <rect x="47" y="82" width="6" height="14" fill="#2e7d32" rx="2"/>
     </svg>''',
-    # 4. 영웅의 성검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fff59d"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#ff6f00"/></linearGradient>
@@ -152,7 +147,6 @@ WEAPON_SVGS = [
         <path d="M25 66 L75 66 L50 76 Z" fill="#ffc107" filter="url(#f4)"/>
         <polygon points="50,60 55,68 50,74 45,68" fill="#ffffff"/>
     </svg>''',
-    # 5. 용살자의 대검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff3d00"/><stop offset="50%" stop-color="#dd2c00"/><stop offset="100%" stop-color="#3e2723"/></linearGradient>
@@ -163,7 +157,6 @@ WEAPON_SVGS = [
         <path d="M22 62 L78 62 L50 75 Z" fill="#d50000" filter="url(#f5)"/>
         <circle cx="50" cy="68" r="5" fill="#ffeb3b"/>
     </svg>''',
-    # 6. 차원 파괴검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="g6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00f0ff"/><stop offset="50%" stop-color="#7000ff"/><stop offset="100%" stop-color="#ff007f"/></linearGradient>
@@ -174,7 +167,6 @@ WEAPON_SVGS = [
         <path d="M20 62 L80 62 L50 76 Z" fill="#7000ff" stroke="#00f0ff" stroke-width="1.5"/>
         <circle cx="50" cy="69" r="6" fill="#00f0ff" filter="url(#f6)"/>
     </svg>''',
-    # 7. 🌌 신멸의 절망검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
         <defs>
             <linearGradient id="g7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#ff007f"/><stop offset="70%" stop-color="#7000ff"/><stop offset="100%" stop-color="#00f0ff"/></linearGradient>
@@ -188,10 +180,9 @@ WEAPON_SVGS = [
     </svg>'''
 ]
 
-# --- 🦸 레벨별 용사 SVG 외형 (단계적 성장형) ---
+# --- 🦸 레벨별 용사 SVG 외형 ---
 def get_hero_svg(lvl):
     if lvl < 10:
-        # 1. 초보 모험가 (소박한 천 옷 + 작은 투구)
         return '''<svg width="115" height="115" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="40" fill="none" stroke="#78909c" stroke-width="1.5"/>
             <path d="M30 85 L50 45 L70 85 Z" fill="#455a64"/>
@@ -201,7 +192,6 @@ def get_hero_svg(lvl):
             <circle cx="56" cy="38" r="2" fill="#212121"/>
         </svg>'''
     elif lvl < 25:
-        # 2. 숙련된 기사 (강철 갑옷 + 푸른 오라)
         return '''<svg width="115" height="115" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="42" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="4 3"/>
             <path d="M25 85 L50 40 L75 85 Z" fill="#263238" stroke="#00b0ff" stroke-width="1.5"/>
@@ -210,7 +200,6 @@ def get_hero_svg(lvl):
             <rect x="42" y="32" width="16" height="4" fill="#00b0ff"/>
         </svg>'''
     elif lvl < 40:
-        # 3. 전설의 챔피언 (황금 날개 + 붉은 성광)
         return '''<svg width="115" height="115" viewBox="0 0 100 100">
             <defs><filter id="hf1"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffd700"/></filter></defs>
             <path d="M 10 50 Q -5 10 40 25 Z" fill="#ffd700" filter="url(#hf1)"/>
@@ -220,7 +209,6 @@ def get_hero_svg(lvl):
             <polygon points="20,20 35,2 50,15 65,2 80,20" fill="#ffab00"/>
         </svg>'''
     else:
-        # 4. 차원 절대신 (네온 후광 + 천상 빛나는 오라)
         return '''<svg width="115" height="115" viewBox="0 0 100 100">
             <defs>
                 <filter id="hf2"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/></filter>
@@ -249,7 +237,6 @@ def get_weapon_info(lvl):
     idx = min(lvl // 7, len(names) - 1)
     return {"name": names[idx], "svg": WEAPON_SVGS[idx]}
 
-# 🔥 몬스터 스탯 난이도 대폭 강화
 def get_monster_info(step):
     prefix = ["말랑", "흉폭한", "저주받은", "심연의", "지옥의", "우주의", "멸망의", "절대"]
     base_names = ["슬라임", "고블린", "골렘", "미노타우로스", "드래곤", "크라켄", "요르문간드", "파괴자"]
@@ -257,8 +244,8 @@ def get_monster_info(step):
     if step == 50:
         return {
             "name": "👑 [FINAL BOSS] 종말의 창조신 파괴자",
-            "hp": 8500000,   # 체력 상향
-            "atk": 12000,    # 공격력 상향
+            "hp": 8500000,
+            "atk": 12000,
             "skill": "⚡ 우주 멸망 소멸 포격",
             "reward": 3000000
         }
@@ -267,7 +254,6 @@ def get_monster_info(step):
     b_idx = min((step - 1) // 7, len(base_names) - 1)
     
     name = f"{prefix[p_idx]} {base_names[b_idx]} (Lv.{step})"
-    # 🔥 배율을 1.20 -> 1.28 로 높여 몬스터 체력 및 공격력 대폭 상향
     hp = int(450 * (1.28 ** step))
     atk = int(35 * (1.16 ** step))
     reward = int(500 * (1.25 ** step))
@@ -285,11 +271,8 @@ if "gold" not in st.session_state:
     st.session_state.log = ["✨ 50단계 신화 모험이 시작되었습니다!"]
 
 # --- 🌟 환생 스탯 계산식 ---
-def get_gold_multiplier():
-    return 1.0 + (st.session_state.rebirth_count * 0.10)
-
-def get_rebirth_atk_bonus():
-    return 1.0 + (st.session_state.rebirth_count * 0.20)
+def get_gold_multiplier(): return 1.0 + (st.session_state.rebirth_count * 0.10)
+def get_rebirth_atk_bonus(): return 1.0 + (st.session_state.rebirth_count * 0.20)
 
 def get_hero_atk(): 
     base = st.session_state.hero_level * 1000
@@ -307,11 +290,10 @@ def get_w_cost(): return int(350 * (1.18 ** st.session_state.weapon_lvl))
 def get_h_cost(): return int(400 * (1.15 ** st.session_state.hero_level))
 
 def get_w_rate(): 
-    if st.session_state.weapon_lvl >= 49:
-        return 1.0
+    if st.session_state.weapon_lvl >= 49: return 1.0
     return max(5.0, 100.0 - (st.session_state.weapon_lvl * 1.95))
 
-# 🎯 레벨 및 스탯 맞춤형 몬스터 추천 알고리즘
+# 🎯 추천 기능 (오류 수정 완료)
 def recommend_monster_step():
     total_atk = get_total_atk()
     max_hp = get_max_hp()
@@ -319,7 +301,6 @@ def recommend_monster_step():
     recommended = 1
     for s in range(1, 51):
         m = get_monster_info(s)
-        # 몬스터를 4~6턴 안에 처치할 수 있는 수준이 가장 알맞은 도전 단계
         turns_to_kill = m["hp"] / (total_atk * 1.2)
         turns_to_die = max_hp / max(1, m["atk"])
         
@@ -329,9 +310,8 @@ def recommend_monster_step():
             break
             
     st.session_state.selected_step = recommended
-    st.toast(f"🎯 AI 추천: Lv.{recommended} 몬스터가 현재 스탯에 가장 적합합니다!", icon="🤖")
+    st.toast(f"🎯 AI 추천: Lv.{recommended} 몬스터가 적합합니다!", icon="🤖")
 
-# 🔄 환생 수행
 def do_rebirth():
     st.session_state.rebirth_count += 1
     st.session_state.hero_level = 1
@@ -346,14 +326,13 @@ def do_rebirth():
         "👑 오버로드 절대 룬 (골드 +40%, ATK +80%)"
     ]
     current_relic = relic_names[min(st.session_state.rebirth_count - 1, len(relic_names) - 1)]
-    
     st.session_state.log.append(f"🔄 [{st.session_state.rebirth_count}회차 환생] 차원 초월 완료! {current_relic} 해금!")
-    st.toast(f"🔄 환생 완료! {st.session_state.rebirth_count}회차 초월 스탯이 영구 적용됩니다.", icon="✨")
+    st.toast(f"🔄 환생 완료! {st.session_state.rebirth_count}회차 스탯이 보너스로 적용됩니다.", icon="✨")
     safe_rerun()
 
 def enhance_weapon():
     if st.session_state.weapon_lvl >= 50:
-        st.toast("👑 검이 이미 최고 단계(50단계)에 도달했습니다!", icon="⭐")
+        st.toast("👑 검이 최고 단계에 도달했습니다!", icon="⭐")
         return
     if st.session_state.gold < get_w_cost():
         st.toast("⚠️ 골드가 부족합니다!", icon="💰")
@@ -368,14 +347,14 @@ def enhance_weapon():
     else:
         if st.session_state.weapon_lvl >= 10:
             st.session_state.weapon_lvl -= 1
-            st.toast("💥 강화 실패! 무기 등급이 -1 하락했습니다!", icon="⚠️")
+            st.toast("💥 강화 실패! 무기 등급 하락!", icon="⚠️")
         else:
             st.toast("❌ 강화 실패! (등급 유지)", icon="🛡️")
     safe_rerun()
 
 def enhance_hero():
     if st.session_state.hero_level >= 50:
-        st.toast("👑 용사가 이미 최고 레벨(50단계)에 도달했습니다!", icon="⭐")
+        st.toast("👑 용사가 최고 레벨에 도달했습니다!", icon="⭐")
         return
     if st.session_state.gold < get_h_cost():
         st.toast("⚠️ 골드가 부족합니다!", icon="💰")
@@ -438,7 +417,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 else mX += (frame - 20) * 18;
             }}
             
-            // 용사 외형 (레벨에 따라 진화)
             ctx.save();
             if (hLvl >= 25) {{
                 ctx.save();
@@ -450,7 +428,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 ctx.restore();
             }}
 
-            // 레벨별 날개/오라 이펙트
             if (hLvl >= 10) {{
                 ctx.fillStyle = hLvl >= 40 ? 'rgba(255, 0, 127, 0.6)' : 'rgba(0, 240, 255, 0.4)';
                 ctx.beginPath();
@@ -464,7 +441,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
             ctx.fillStyle = '#ffffff';
             ctx.beginPath(); ctx.arc(hX, 115, 20 + (hLvl > 30 ? 6 : 0), 0, Math.PI*2); ctx.fill();
             
-            // 왕관/투구
             if (hLvl >= 20) {{
                 ctx.fillStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 15;
                 ctx.beginPath();
@@ -475,7 +451,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
             ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 25, 162);
             ctx.restore();
             
-            // 몬스터
             ctx.save();
             if (isFinalBoss) {{
                 let size = 58 + Math.sin(frame*0.2)*8;
@@ -492,7 +467,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
             ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 40, 165);
             ctx.restore();
             
-            // 타격 이펙트
             if (strike) {{
                 ctx.save();
                 if (isHeroTurn) {{
@@ -572,10 +546,11 @@ st.subheader("⚔️ 50단계 실시간 격투 아레나")
 
 skip_battle = st.checkbox("⏩ 전투 연출 SKIP (즉시 계산)", value=False)
 
-# 몬스터 단계 선택 및 AI 추천
+# 몬스터 단계 선택 및 안전한 AI 추천 구조
 c_step1, c_step2 = st.columns([3, 1])
 with c_step1:
-    m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 50단계)", 1, 50, key="selected_step")
+    m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 50단계)", 1, 50, value=st.session_state.selected_step)
+    st.session_state.selected_step = m_step
 with c_step2:
     st.write("")
     if st.button("🤖 AI 추천 도전"):
