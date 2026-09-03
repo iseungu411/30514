@@ -102,7 +102,7 @@ def safe_rerun():
     if hasattr(st, "rerun"): st.rerun()
     elif hasattr(st, "experimental_rerun"): st.experimental_rerun()
 
-# --- ⚔️ 고퀄리티 그래픽 무기 SVG 라이브러리 ---
+# --- ⚔️ 무기 SVG 라이브러리 ---
 WEAPON_SVGS = [
     # 0. 단검
     '''<svg width="120" height="120" viewBox="0 0 100 100">
@@ -188,6 +188,51 @@ WEAPON_SVGS = [
     </svg>'''
 ]
 
+# --- 🦸 레벨별 용사 SVG 외형 (단계적 성장형) ---
+def get_hero_svg(lvl):
+    if lvl < 10:
+        # 1. 초보 모험가 (소박한 천 옷 + 작은 투구)
+        return '''<svg width="115" height="115" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#78909c" stroke-width="1.5"/>
+            <path d="M30 85 L50 45 L70 85 Z" fill="#455a64"/>
+            <circle cx="50" cy="38" r="16" fill="#ffe0b2"/>
+            <path d="M36 28 C36 18 64 18 64 28 Z" fill="#78909c"/>
+            <circle cx="44" cy="38" r="2" fill="#212121"/>
+            <circle cx="56" cy="38" r="2" fill="#212121"/>
+        </svg>'''
+    elif lvl < 25:
+        # 2. 숙련된 기사 (강철 갑옷 + 푸른 오라)
+        return '''<svg width="115" height="115" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="4 3"/>
+            <path d="M25 85 L50 40 L75 85 Z" fill="#263238" stroke="#00b0ff" stroke-width="1.5"/>
+            <circle cx="50" cy="36" r="18" fill="#eceff1"/>
+            <polygon points="32,22 50,8 68,22" fill="#00e5ff"/>
+            <rect x="42" y="32" width="16" height="4" fill="#00b0ff"/>
+        </svg>'''
+    elif lvl < 40:
+        # 3. 전설의 챔피언 (황금 날개 + 붉은 성광)
+        return '''<svg width="115" height="115" viewBox="0 0 100 100">
+            <defs><filter id="hf1"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffd700"/></filter></defs>
+            <path d="M 10 50 Q -5 10 40 25 Z" fill="#ffd700" filter="url(#hf1)"/>
+            <path d="M 90 50 Q 105 10 60 25 Z" fill="#ffd700" filter="url(#hf1)"/>
+            <path d="M22 88 L50 35 L78 88 Z" fill="#37474f" stroke="#ffd700" stroke-width="2"/>
+            <circle cx="50" cy="34" r="20" fill="#ffffff" filter="url(#hf1)"/>
+            <polygon points="20,20 35,2 50,15 65,2 80,20" fill="#ffab00"/>
+        </svg>'''
+    else:
+        # 4. 차원 절대신 (네온 후광 + 천상 빛나는 오라)
+        return '''<svg width="115" height="115" viewBox="0 0 100 100">
+            <defs>
+                <filter id="hf2"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/></filter>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#ffd700" stroke-width="2.5" filter="url(#hf2)"/>
+            <path d="M 0 50 Q -20 -10 45 15 Z" fill="rgba(255,0,127,0.8)" filter="url(#hf2)"/>
+            <path d="M 100 50 Q 120 -10 55 15 Z" fill="rgba(0,240,255,0.8)" filter="url(#hf2)"/>
+            <path d="M18 90 L50 28 L82 90 Z" fill="#110022" stroke="#ff007f" stroke-width="2.5"/>
+            <circle cx="50" cy="30" r="22" fill="#ffffff" filter="url(#hf2)"/>
+            <polygon points="15,15 32,-5 50,10 68,-5 85,15" fill="#ffd700" filter="url(#hf2)"/>
+        </svg>'''
+
 def get_hero_title(lvl):
     if lvl < 10: return "초보 모험가"
     elif lvl < 20: return "숙련된 기사"
@@ -204,6 +249,7 @@ def get_weapon_info(lvl):
     idx = min(lvl // 7, len(names) - 1)
     return {"name": names[idx], "svg": WEAPON_SVGS[idx]}
 
+# 🔥 몬스터 스탯 난이도 대폭 강화
 def get_monster_info(step):
     prefix = ["말랑", "흉폭한", "저주받은", "심연의", "지옥의", "우주의", "멸망의", "절대"]
     base_names = ["슬라임", "고블린", "골렘", "미노타우로스", "드래곤", "크라켄", "요르문간드", "파괴자"]
@@ -211,19 +257,20 @@ def get_monster_info(step):
     if step == 50:
         return {
             "name": "👑 [FINAL BOSS] 종말의 창조신 파괴자",
-            "hp": 2200000,
-            "atk": 2800,
+            "hp": 8500000,   # 체력 상향
+            "atk": 12000,    # 공격력 상향
             "skill": "⚡ 우주 멸망 소멸 포격",
-            "reward": 1000000
+            "reward": 3000000
         }
     
     p_idx = min((step - 1) // 7, len(prefix) - 1)
     b_idx = min((step - 1) // 7, len(base_names) - 1)
     
     name = f"{prefix[p_idx]} {base_names[b_idx]} (Lv.{step})"
-    hp = int(300 * (1.20 ** step))
-    atk = int(20 * (1.11 ** step))
-    reward = int(400 * (1.20 ** step))
+    # 🔥 배율을 1.20 -> 1.28 로 높여 몬스터 체력 및 공격력 대폭 상향
+    hp = int(450 * (1.28 ** step))
+    atk = int(35 * (1.16 ** step))
+    reward = int(500 * (1.25 ** step))
     
     return {"name": name, "hp": hp, "atk": atk, "skill": "💥 강격 파동", "reward": reward}
 
@@ -233,16 +280,15 @@ if "gold" not in st.session_state:
     st.session_state.hero_level = 1
     st.session_state.gold = 10000
     st.session_state.weapon_lvl = 0
-    st.session_state.rebirth_count = 0  # 환생 횟수
+    st.session_state.rebirth_count = 0
+    st.session_state.selected_step = 1
     st.session_state.log = ["✨ 50단계 신화 모험이 시작되었습니다!"]
 
 # --- 🌟 환생 스탯 계산식 ---
 def get_gold_multiplier():
-    # 환생 1회당 골드 획득 +10%
     return 1.0 + (st.session_state.rebirth_count * 0.10)
 
 def get_rebirth_atk_bonus():
-    # 환생 1회당 기본 공격력 +20%
     return 1.0 + (st.session_state.rebirth_count * 0.20)
 
 def get_hero_atk(): 
@@ -265,12 +311,33 @@ def get_w_rate():
         return 1.0
     return max(5.0, 100.0 - (st.session_state.weapon_lvl * 1.95))
 
-# 🔄 환생 수행 함수
+# 🎯 레벨 및 스탯 맞춤형 몬스터 추천 알고리즘
+def recommend_monster_step():
+    total_atk = get_total_atk()
+    max_hp = get_max_hp()
+    
+    recommended = 1
+    for s in range(1, 51):
+        m = get_monster_info(s)
+        # 몬스터를 4~6턴 안에 처치할 수 있는 수준이 가장 알맞은 도전 단계
+        turns_to_kill = m["hp"] / (total_atk * 1.2)
+        turns_to_die = max_hp / max(1, m["atk"])
+        
+        if turns_to_kill <= 6 and turns_to_die >= 3:
+            recommended = s
+        else:
+            break
+            
+    st.session_state.selected_step = recommended
+    st.toast(f"🎯 AI 추천: Lv.{recommended} 몬스터가 현재 스탯에 가장 적합합니다!", icon="🤖")
+
+# 🔄 환생 수행
 def do_rebirth():
     st.session_state.rebirth_count += 1
     st.session_state.hero_level = 1
     st.session_state.weapon_lvl = 0
     st.session_state.gold = 10000
+    st.session_state.selected_step = 1
     
     relic_names = [
         "🔮 태초의 차원 구슬 (골드 +10%, ATK +20%)",
@@ -339,6 +406,7 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
         let mStep = {monster_step};
         let isUlt = { 'true' if is_ultimate else 'false' };
         let isHeroTurn = { 'true' if is_hero_turn else 'false' };
+        let hLvl = {hero_level};
 
         function animate() {{
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -370,48 +438,39 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 else mX += (frame - 20) * 18;
             }}
             
-            // 용사 오라 & 파티클
+            // 용사 외형 (레벨에 따라 진화)
             ctx.save();
-            ctx.save();
-            ctx.translate(hX, 115);
-            ctx.rotate(frame * 0.04);
-            ctx.strokeStyle = 'rgba(0, 240, 255, 0.5)'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.arc(0, 0, 42, 0, Math.PI*2); ctx.stroke();
-            for(let i=0; i<4; i++) {{
-                ctx.rotate(Math.PI/2);
-                ctx.fillStyle = '#ffd700'; ctx.fillRect(38, -3, 6, 6);
-            }}
-            ctx.restore();
-
-            for(let p=0; p<5; p++) {{
-                let px = hX + Math.sin(frame + p*2) * 20;
-                let py = 115 + 20 - ((frame*3 + p*15) % 50);
-                ctx.fillStyle = '#00f0ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 8;
-                ctx.beginPath(); ctx.arc(px, py, 2.5, 0, Math.PI*2); ctx.fill();
+            if (hLvl >= 25) {{
+                ctx.save();
+                ctx.translate(hX, 115);
+                ctx.rotate(frame * 0.04);
+                ctx.strokeStyle = hLvl >= 40 ? 'rgba(255, 0, 127, 0.7)' : 'rgba(0, 240, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0, 0, 42, 0, Math.PI*2); ctx.stroke();
+                ctx.restore();
             }}
 
-            ctx.fillStyle = 'rgba(255, 0, 127, 0.45)';
-            ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 2;
-            ctx.shadowColor = '#ff007f'; ctx.shadowBlur = 25;
-            
-            ctx.beginPath();
-            ctx.moveTo(hX, 115); ctx.lineTo(hX - 55, 60); ctx.lineTo(hX - 25, 110);
-            ctx.moveTo(hX, 115); ctx.lineTo(hX + 55, 60); ctx.lineTo(hX + 25, 110);
-            ctx.moveTo(hX, 115); ctx.lineTo(hX - 45, 145); ctx.lineTo(hX - 15, 120);
-            ctx.moveTo(hX, 115); ctx.lineTo(hX + 45, 145); ctx.lineTo(hX + 15, 120);
-            ctx.fill(); ctx.stroke();
+            // 레벨별 날개/오라 이펙트
+            if (hLvl >= 10) {{
+                ctx.fillStyle = hLvl >= 40 ? 'rgba(255, 0, 127, 0.6)' : 'rgba(0, 240, 255, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(hX, 115); ctx.lineTo(hX - 55, 60); ctx.lineTo(hX - 25, 110);
+                ctx.moveTo(hX, 115); ctx.lineTo(hX + 55, 60); ctx.lineTo(hX + 25, 110);
+                ctx.fill();
+            }}
 
-            ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 35;
+            ctx.shadowColor = hLvl >= 40 ? '#ff007f' : '#00f0ff';
+            ctx.shadowBlur = 20 + hLvl;
             ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.arc(hX, 115, 24, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(hX, 115, 20 + (hLvl > 30 ? 6 : 0), 0, Math.PI*2); ctx.fill();
             
-            ctx.fillStyle = '#00f0ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 10;
-            ctx.fillRect(hX - 8, 110, 5, 3); ctx.fillRect(hX + 3, 110, 5, 3);
-            
-            ctx.fillStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 15;
-            ctx.beginPath();
-            ctx.moveTo(hX - 22, 94); ctx.lineTo(hX - 11, 70); ctx.lineTo(hX, 85); ctx.lineTo(hX + 11, 70); ctx.lineTo(hX + 22, 94);
-            ctx.closePath(); ctx.fill();
+            // 왕관/투구
+            if (hLvl >= 20) {{
+                ctx.fillStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.moveTo(hX - 20, 95); ctx.lineTo(hX - 10, 72); ctx.lineTo(hX, 86); ctx.lineTo(hX + 10, 72); ctx.lineTo(hX + 20, 95);
+                ctx.closePath(); ctx.fill();
+            }}
             
             ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 25, 162);
             ctx.restore();
@@ -419,15 +478,15 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
             // 몬스터
             ctx.save();
             if (isFinalBoss) {{
-                let size = 55 + Math.sin(frame*0.2)*8;
+                let size = 58 + Math.sin(frame*0.2)*8;
                 ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 5; ctx.shadowColor = '#ff0055'; ctx.shadowBlur = 50;
                 ctx.beginPath(); ctx.arc(mX, 115, size, 0, Math.PI*2); ctx.stroke();
-                ctx.fillStyle = '#110022'; ctx.fillRect(mX - 32, 115 - 32, 64, 64);
-                ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(mX, 115, 18, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#110022'; ctx.fillRect(mX - 35, 115 - 35, 70, 70);
+                ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(mX, 115, 20, 0, Math.PI*2); ctx.fill();
             }} else {{
                 ctx.fillStyle = mStep >= 25 ? '#ff007f' : '#a100ff';
                 ctx.shadowColor = '#a100ff'; ctx.shadowBlur = 15;
-                let boxSize = 38 + Math.min(mStep, 50) * 0.4;
+                let boxSize = 38 + Math.min(mStep, 50) * 0.5;
                 ctx.fillRect(mX - boxSize/2, 115 - boxSize/2, boxSize, boxSize);
             }}
             ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 40, 165);
@@ -441,8 +500,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                         ctx.strokeStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 45; ctx.lineWidth = 14;
                         ctx.beginPath(); ctx.moveTo(mX - 70, 45); ctx.lineTo(mX + 70, 185); ctx.stroke();
                         ctx.beginPath(); ctx.moveTo(mX + 70, 45); ctx.lineTo(mX - 70, 185); ctx.stroke();
-                        ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 6;
-                        ctx.beginPath(); ctx.arc(mX, 115, 50 + (frame-10)*4, 0, Math.PI*2); ctx.stroke();
                     }} else {{
                         ctx.strokeStyle = '#00f0ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 25; ctx.lineWidth = 8;
                         ctx.beginPath(); ctx.moveTo(mX - 45, 65); ctx.lineTo(mX + 45, 165); ctx.stroke();
@@ -486,13 +543,7 @@ with col_hero:
     st.markdown(f"""
     <div class='profile-card'>
         <div class='svg-container'>
-            <svg width="115" height="115" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="6 4"/>
-                <path d="M 0 50 Q -15 0 40 20 Z" fill="rgba(255,0,127,0.7)"/>
-                <path d="M 100 50 Q 115 0 60 20 Z" fill="rgba(255,0,127,0.7)"/>
-                <circle cx="50" cy="50" r="26" fill="#ffffff" filter="drop-shadow(0 0 15px #00f0ff)"/>
-                <polygon points="22,30 36,8 50,22 64,8 78,30" fill="#ffd700" filter="drop-shadow(0 0 10px #ffd700)"/>
-            </svg>
+            {get_hero_svg(st.session_state.hero_level)}
         </div>
         <b>[{get_hero_title(st.session_state.hero_level)}] {st.session_state.hero_name}</b><br>
         HP: {get_max_hp():,} | ATK: {get_hero_atk():,}
@@ -520,7 +571,17 @@ st.markdown("---")
 st.subheader("⚔️ 50단계 실시간 격투 아레나")
 
 skip_battle = st.checkbox("⏩ 전투 연출 SKIP (즉시 계산)", value=False)
-m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 50단계)", 1, 50, st.session_state.hero_level)
+
+# 몬스터 단계 선택 및 AI 추천
+c_step1, c_step2 = st.columns([3, 1])
+with c_step1:
+    m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 50단계)", 1, 50, key="selected_step")
+with c_step2:
+    st.write("")
+    if st.button("🤖 AI 추천 도전"):
+        recommend_monster_step()
+        safe_rerun()
+
 monster = get_monster_info(m_step)
 
 st.markdown(f"**상대 Monster**: <span style='color:#ff007f; font-weight:bold;'>{monster['name']}</span> | HP: {monster['hp']:,} | ATK: {monster['atk']:,}", unsafe_allow_html=True)
@@ -609,7 +670,7 @@ if st.button("⚡ 전투 개시!", use_container_width=True):
     # 전투 결과
     if monster_hp <= 0:
         raw_reward = monster['reward']
-        final_reward = int(raw_reward * get_gold_multiplier())  # 환생 보너스 반영
+        final_reward = int(raw_reward * get_gold_multiplier())
         st.session_state.gold += final_reward
         st.balloons()
         
