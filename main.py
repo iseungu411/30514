@@ -1,452 +1,246 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import random
 import time
 
-st.set_page_config(page_title="NEON RPG: 50 OVERDRIVE", page_icon="⚔️", layout="centered")
+# 페이지 기본 설정
+st.set_page_config(
+    page_title="RPG: 용사와 전설의 성검",
+    page_icon="⚔️",
+    layout="wide"
+)
 
-# --- 🎨 Cyberpunk & Neon Design CSS (전체 UI 디자인) ---
+# -------------------------------------------------------------------
+# 1. 세션 상태 (Game State) 초기화
+# -------------------------------------------------------------------
+if "hero_level" not in st.session_state:
+    st.session_state.hero_level = 1
+if "sword_level" not in st.session_state:
+    st.session_state.sword_level = 0
+if "gold" not in st.session_state:
+    st.session_state.gold = 2000
+
+# 기초 스탯 계산 (성검 강화도가 공격력에 폭발적 추가)
+hero_atk = 15 + (st.session_state.hero_level * 15) + (st.session_state.sword_level * 25)
+hero_hp = 120 + (st.session_state.hero_level * 60)
+
+hero_cost = int(120 * (1.35 ** (st.session_state.hero_level - 1)))
+sword_cost = int(200 * (1.5 ** st.session_state.sword_level))
+
+# -------------------------------------------------------------------
+# 2. 고급 CSS 연출 (네온, 검 이펙트, 카드 스타일)
+# -------------------------------------------------------------------
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Noto+Sans+KR:wght@500;700;900&display=swap');
-
     .stApp {
-        background: 
-            radial-gradient(circle at 50% 30%, rgba(255, 0, 127, 0.15) 0%, transparent 60%),
-            radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.15) 0%, transparent 60%),
-            linear-gradient(180deg, #120326 0%, #030008 100%);
-        color: #ffffff;
-        font-family: 'Noto Sans KR', sans-serif;
+        background-color: #0b0c10;
+        color: #c5c6c7;
     }
-
-    .game-title {
-        font-family: 'Orbitron', sans-serif;
+    
+    /* 성검 표시 영역 */
+    .sword-card {
+        background: linear-gradient(135deg, #1f2833 0%, #0b0c10 100%);
+        border: 2px solid #66fcf1;
+        border-radius: 12px;
+        padding: 20px;
         text-align: center;
-        font-size: 2.5rem;
-        font-weight: 900;
-        letter-spacing: 3px;
-        background: linear-gradient(180deg, #00f0ff 0%, #ff007f 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 30px rgba(0, 240, 255, 0.8), 0 0 10px rgba(255, 0, 127, 0.5);
-        margin-bottom: 20px;
+        box-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
+    }
+    .sword-title {
+        color: #66fcf1;
+        font-weight: bold;
+        font-size: 22px;
+        margin-bottom: 5px;
     }
 
-    .profile-card, .weapon-card-glow {
-        background: rgba(18, 8, 38, 0.75);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(0, 240, 255, 0.6);
-        border-radius: 20px;
+    /* 몬스터 회전 마법진 */
+    .magic-circle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .magic-circle {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 55px;
+        animation: rotateMagic 8s linear infinite;
+        box-shadow: 0 0 30px #45a29e;
+        border: 4px dashed #45a29e;
+        background: radial-gradient(circle, rgba(102,252,241,0.15) 0%, rgba(11,12,16,0.9) 80%);
+    }
+    @keyframes rotateMagic {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* 용사 스탯 박스 */
+    .hero-card {
+        background-color: #1f2833;
         padding: 18px;
+        border-radius: 12px;
+        border: 1px solid #45a29e;
         text-align: center;
-        box-shadow: 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 240, 255, 0.1);
-    }
-    .weapon-card-glow { 
-        border-color: rgba(255, 0, 127, 0.8); 
-        box-shadow: 0 0 20px rgba(255, 0, 127, 0.3), inset 0 0 15px rgba(255, 0, 127, 0.15);
-    }
-
-    .svg-container {
-        width: 100%; height: 120px;
-        display: flex; justify-content: center; align-items: center;
-        background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, rgba(0,0,0,0.6) 100%);
-        border-radius: 14px; margin-bottom: 12px;
-        border: 1px solid rgba(255,255,255,0.08);
-    }
-    
-    .battle-arena {
-        background: radial-gradient(circle at center, rgba(35, 10, 55, 0.95) 0%, rgba(5, 1, 15, 0.98) 100%);
-        border: 2px solid #ff007f;
-        box-shadow: 0 0 40px rgba(255, 0, 127, 0.5), inset 0 0 20px rgba(0, 240, 255, 0.2);
-        border-radius: 24px;
-        padding: 22px;
-        margin-top: 15px;
-    }
-
-    .battle-log-text {
-        font-family: 'Orbitron', 'Noto Sans KR', sans-serif;
-        font-size: 0.9rem;
-        line-height: 1.6;
-        background: rgba(0, 0, 0, 0.6);
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    div.stButton > button {
-        width: 100% !important; height: 50px !important; border-radius: 14px !important;
-        font-weight: 900 !important; font-size: 1.1rem !important;
-        background: linear-gradient(135deg, #ff007f 0%, #7928ca 50%, #00f0ff 100%) !important;
-        color: #ffffff !important; border: none !important;
-        box-shadow: 0 0 20px rgba(255, 0, 127, 0.5) !important;
-        transition: all 0.2s ease-in-out;
-    }
-    div.stButton > button:hover {
-        transform: translateY(-2px) scale(1.01);
-        box-shadow: 0 0 30px rgba(0, 240, 255, 0.9) !important;
     }
     </style>
-""", unsafe_allow_html=True)
+""", unsafe_allowed_html=True)
 
-def safe_rerun():
-    if hasattr(st, "rerun"): st.rerun()
-    elif hasattr(st, "experimental_rerun"): st.experimental_rerun()
+# -------------------------------------------------------------------
+# 3. 데이터 및 AI 로직
+# -------------------------------------------------------------------
+MONSTER_NAMES = ["고블린 주술사", "아크 오크", "암흑 골렘", "심해 몬스터", "화염 드래곤", "마왕 아스타로트"]
+MONSTER_ICONS = ["👹", "👺", "🗿", "🐙", "🐉", "💀"]
+SWORD_NAMES = ["녹슨 철검", "강철 장검", "빛의 룬소드", "용살자의 대검", "신성한 엑스칼리버"]
 
-# --- 🎯 게임 데이터 로직 ---
-def get_hero_title(lvl):
-    if lvl < 10: return "초보 모험가"
-    elif lvl < 20: return "숙련된 기사"
-    elif lvl < 30: return "영웅 챔피언"
-    elif lvl < 40: return "전설의 마스터"
-    elif lvl < 50: return "신화의 오버로드"
-    else: return "🌌 차원 절대신"
+def get_sword_info(lvl):
+    idx = min(lvl // 3, len(SWORD_NAMES) - 1)
+    name = f"{SWORD_NAMES[idx]} (+{lvl})"
+    return name
 
-def get_weapon_name(lvl):
-    names = [
-        "녹슨 단검", "강철 장검", "룬 각인 검", "엘프의 명검", "영웅의 성검", 
-        "용살자의 대검", "차원 파괴검", "신화의 오버로드 블레이드", "우주 집행검", "🌌 신멸의 절망검"
-    ]
-    idx = min(lvl // 5, len(names) - 1)
-    return f"{names[idx]}"
+def get_monster_stats(level):
+    name = f"Lvl.{level} {MONSTER_NAMES[(level-1) % len(MONSTER_NAMES)]}"
+    hp = int(100 * (1.27 ** (level - 1)))
+    atk = int(12 * (1.24 ** (level - 1)))
+    reward = int(70 * (1.33 ** (level - 1)))
+    icon = MONSTER_ICONS[(level-1) % len(MONSTER_ICONS)]
+    return {"level": level, "name": name, "hp": hp, "atk": atk, "reward": reward, "icon": icon}
 
-def get_monster_info(step):
-    prefix = ["말랑", "흉폭한", "저주받은", "심연의", "지옥의", "우주의", "멸망의", "절대"]
-    base_names = ["슬라임", "고블린", "골렘", "미노타우로스", "드래곤", "크라켄", "요르문간드", "파괴자"]
+def recommend_monster(h_atk, h_hp):
+    best_level = 1
+    for lvl in range(1, 51):
+        m = get_monster_stats(lvl)
+        turns_to_kill_m = (m["hp"] + h_atk - 1) // h_atk
+        turns_to_kill_h = (h_hp + m["atk"] - 1) // m["atk"]
+        if turns_to_kill_m <= turns_to_kill_h:
+            best_level = lvl
+    return best_level
+
+# -------------------------------------------------------------------
+# 4. UI 레이아웃
+# -------------------------------------------------------------------
+st.title("⚔️ 전설의 용사와 AI 토벌전")
+st.caption("고화질 그래픽과 성장 시스템이 적용된 몬스터 토벌 RPG입니다.")
+
+col1, col2 = st.columns([1, 1])
+
+# --- [좌측: 용사 & 검 스탯 관리] ---
+with col1:
+    st.subheader("🛡️ 용사 & 전설의 성검")
     
-    if step == 50:
-        return {
-            "name": "👑 [FINAL BOSS] 종말의 창조신 파괴자",
-            "hp": 500000,
-            "atk": 4500,
-            "skill": "⚡ 우주 멸망 소멸 포격",
-            "reward": 500000
-        }
-    
-    p_idx = min((step - 1) // 7, len(prefix) - 1)
-    b_idx = min((step - 1) // 7, len(base_names) - 1)
-    
-    name = f"{prefix[p_idx]} {base_names[b_idx]} (Lv.{step})"
-    hp = int(120 * (1.25 ** step))
-    atk = int(15 * (1.2 ** step))
-    reward = int(200 * (1.28 ** step))
-    
-    return {"name": name, "hp": hp, "atk": atk, "skill": "💥 강격 파동", "reward": reward}
-
-# --- 💾 Session State 초기화 ---
-if "gold" not in st.session_state:
-    st.session_state.hero_name = "용사님"
-    st.session_state.hero_level = 1
-    st.session_state.gold = 10000
-    st.session_state.weapon_lvl = 0
-    st.session_state.log = ["✨ 50단계 전설의 오버로드 모험이 시작되었습니다!"]
-
-def get_hero_atk(): return st.session_state.hero_level * 50
-def get_weapon_atk(): return st.session_state.weapon_lvl * 70
-def get_total_atk(): return get_hero_atk() + get_weapon_atk()
-def get_max_hp(): return 300 + (st.session_state.hero_level * 150)
-
-def get_w_cost(): return (st.session_state.weapon_lvl + 1) * 200
-def get_h_cost(): return st.session_state.hero_level * 250
-def get_w_rate(): return max(35, 100 - (st.session_state.weapon_lvl * 1.3))
-
-def enhance_weapon():
-    if st.session_state.weapon_lvl >= 50:
-        st.toast("👑 검이 최고 단계(50단계)에 도달했습니다!", icon="⭐")
-        return
-    if st.session_state.gold < get_w_cost():
-        st.toast("⚠️ 골드가 부족합니다!", icon="💰")
-        return
-    st.session_state.gold -= get_w_cost()
-    if random.randint(1, 100) <= get_w_rate():
-        st.session_state.weapon_lvl += 1
-        st.toast(f"⚔️ 무기 강화 성공! (+{st.session_state.weapon_lvl})", icon="✨")
-    else:
-        st.toast("❌ 강화 실패! (등급 유지)", icon="🛡️")
-    safe_rerun()
-
-def enhance_hero():
-    if st.session_state.hero_level >= 50:
-        st.toast("👑 용사가 최고 레벨(50단계)에 도달했습니다!", icon="⭐")
-        return
-    if st.session_state.gold < get_h_cost():
-        st.toast("⚠️ 골드가 부족합니다!", icon="💰")
-        return
-    st.session_state.gold -= get_h_cost()
-    st.session_state.hero_level += 1
-    st.toast(f"🦸 레벨 업! (Lv.{st.session_state.hero_level})", icon="💪")
-    safe_rerun()
-
-# --- 🎨 모든 단계 몬스터 화려한 애니메이션 엔진 ---
-def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, damage, is_hero_turn, hero_level, render_id):
-    html_code = f"""
-    <div style="text-align: center;">
-        <canvas id="battleCanvas_{render_id}" width="600" height="230" style="border-radius:15px; border:2px solid #00f0ff; background: linear-gradient(180deg, #10002b 0%, #030008 100%); box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);"></canvas>
+    # 성검 외형 카드
+    sword_name = get_sword_info(st.session_state.sword_level)
+    st.markdown(f"""
+    <div class="sword-card">
+        <div class="sword-title">🗡️ {sword_name}</div>
+        <p style="color: #66fcf1; margin:0;">공격력 보너스: +{st.session_state.sword_level * 25}</p>
     </div>
-    <script>
-    (function() {{
-        const canvas = document.getElementById('battleCanvas_{render_id}');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let frame = 0;
-        
-        let heroX = 90;
-        let monsterX = 470;
-        let mStep = {monster_step};
-        let hLvl = {hero_level};
-        
-        // 🎨 몬스터 단계별 색상 및 마법진 타입 설정
-        function getMonsterTheme(step) {{
-            if (step < 10) return {{ color: '#38bdf8', aura: '#0284c7', ring: 3, name: '독기 슬라임' }};
-            if (step < 20) return {{ color: '#4ade80', aura: '#15803d', ring: 4, name: '맹독 고블린' }};
-            if (step < 30) return {{ color: '#facc15', aura: '#b45309', ring: 5, name: '황금 미노타우로스' }};
-            if (step < 40) return {{ color: '#a855f7', aura: '#6b21a8', ring: 6, name: '심연의 크라켄' }};
-            if (step < 50) return {{ color: '#ff007f', aura: '#9f1239', ring: 8, name: '멸망의 용살자' }};
-            return {{ color: '#ff0055', aura: '#ff0055', ring: 12, name: '종말의 창조신' }};
-        }}
-        
-        const mTheme = getMonsterTheme(mStep);
-
-        function animate() {{
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 🌌 배경 사이버네틱 그리드
-            ctx.strokeStyle = mTheme.color + '22';
-            ctx.lineWidth = 1;
-            for(let x=0; x<canvas.width; x+=30) {{ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }}
-            for(let y=0; y<canvas.height; y+=30) {{ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }}
-            
-            let hX = heroX;
-            let mX = monsterX;
-            let strike = false;
-            
-            // 이동 애니메이션
-            if ({ 'true' if is_hero_turn else 'false' }) {{
-                if (frame < 10) hX += frame * 18;
-                else if (frame < 20) {{ hX = 370; strike = true; mX += Math.sin(frame)*12; }}
-                else hX -= (frame - 20) * 18;
-            }} else {{
-                if (frame < 10) mX -= frame * 18;
-                else if (frame < 20) {{ mX = 190; strike = true; hX += Math.sin(frame)*12; }}
-                else mX += (frame - 20) * 18;
-            }}
-            
-            // 🦸 1. 용사 연출
-            ctx.save();
-            if (hLvl >= 20) {{
-                ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 15;
-                ctx.beginPath(); ctx.arc(hX, 115, 28 + Math.sin(frame*0.3)*3, 0, Math.PI*2); ctx.stroke();
-            }}
-            ctx.fillStyle = hLvl >= 40 ? '#00ffff' : '#00f0ff';
-            ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 15;
-            ctx.beginPath(); ctx.arc(hX, 115, 22, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 25, 160);
-            ctx.restore();
-            
-            // 👹 2. 모든 단계 몬스터 고유 마법진 & 네온 연출
-            ctx.save();
-            let size = 32 + Math.min(mStep, 45) * 0.35 + Math.sin(frame*0.25)*4;
-            
-            // (1) 회전 다각형 마법진 연출 (모든 몬스터 공통)
-            ctx.strokeStyle = mTheme.color; ctx.lineWidth = 2.5; ctx.shadowColor = mTheme.color; ctx.shadowBlur = 20;
-            ctx.beginPath(); ctx.arc(mX, 115, size + 10, 0, Math.PI*2); ctx.stroke();
-            
-            ctx.beginPath();
-            for(let i=0; i<mTheme.ring; i++) {{
-                let ang = (frame*0.06) + (i * Math.PI * 2 / mTheme.ring);
-                let rx = mX + Math.cos(ang) * (size + 10);
-                let ry = 115 + Math.sin(ang) * (size + 10);
-                if(i===0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
-            }}
-            ctx.closePath(); ctx.stroke();
-            
-            // (2) 몬스터 코어 본체
-            ctx.fillStyle = mTheme.color; ctx.shadowColor = mTheme.aura; ctx.shadowBlur = 25;
-            ctx.beginPath(); ctx.arc(mX, 115, size * 0.7, 0, Math.PI*2); ctx.fill();
-            
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 35, 165);
-            ctx.restore();
-            
-            // ⚔️ 3. 타격 & 스킬 연출
-            if (strike) {{
-                ctx.save();
-                if ({ 'true' if is_hero_turn else 'false' }) {{
-                    if ({ 'true' if is_ultimate else 'false' }) {{
-                        ctx.strokeStyle = '#ff007f'; ctx.shadowColor = '#ff007f'; ctx.shadowBlur = 30; ctx.lineWidth = 8;
-                        ctx.beginPath(); ctx.moveTo(mX - 50, 65); ctx.lineTo(mX + 50, 165); ctx.stroke();
-                        ctx.beginPath(); ctx.moveTo(mX + 50, 65); ctx.lineTo(mX - 50, 165); ctx.stroke();
-                    }} else {{
-                        ctx.strokeStyle = '#00f0ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 15; ctx.lineWidth = 5;
-                        ctx.beginPath(); ctx.moveTo(mX - 35, 75); ctx.lineTo(mX + 35, 155); ctx.stroke();
-                    }}
-                }} else {{
-                    // 몬스터 공격 연출 (단계별 색상 차용)
-                    ctx.strokeStyle = mTheme.color; ctx.shadowColor = mTheme.color; ctx.shadowBlur = 25; ctx.lineWidth = 7;
-                    ctx.beginPath(); ctx.moveTo(mX, 115); ctx.lineTo(hX, 115); ctx.stroke();
-                }}
+    """, unsafe_allow_html=True)
+    
+    st.write("")
+    
+    # 용사 스탯 표시
+    st.markdown(f"""
+    <div class="hero-card">
+        <h4>🎖️ 용사 레벨 {st.session_state.hero_level}</h4>
+        <p>❤️ <b>체력:</b> {hero_hp} | ⚔️ <b>총 공격력:</b> {hero_atk}</p>
+        <p style="color:#66fcf1;">💰 <b>보유 골드:</b> {st.session_state.gold:,} G</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.write("")
+    
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        if st.button(f"⬆️ 용사 레벨업\n({hero_cost:,} G)", use_container_width=True):
+            if st.session_state.gold >= hero_cost:
+                st.session_state.gold -= hero_cost
+                st.session_state.hero_level += 1
+                st.rerun()
+            else:
+                st.error("골드가 부족합니다!")
                 
-                // 데미지 스플래시
-                ctx.fillStyle = '#ffff00'; ctx.font = 'bold 26px Orbitron';
-                let txtX = { 'mX' if is_hero_turn else 'hX' };
-                ctx.fillText('-{damage:,}', txtX - 25, 50);
-                ctx.restore();
-            }}
-            
-            frame++;
-            if (frame < 28) requestAnimationFrame(animate);
-        }}
-        animate();
-    }})();
-    </script>
-    """
-    return html_code
+    with btn_col2:
+        if st.button(f"🗡️ 검 제련하기\n({sword_cost:,} G)", use_container_width=True):
+            if st.session_state.gold >= sword_cost:
+                st.session_state.gold -= sword_cost
+                st.session_state.sword_level += 1
+                st.success("성검 강화에 성공했습니다!")
+                st.rerun()
+            else:
+                st.error("골드가 부족합니다!")
 
-# --- 🖥️ UI Layout ---
-st.markdown("<h1 class='game-title'>⚔️ OVERDRIVE BATTLE 50 ⚔️</h1>", unsafe_allow_html=True)
+    st.divider()
 
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("💰 골드", f"{st.session_state.gold:,} G")
-m2.metric("⚡ 총 공격력", f"{get_total_atk():,} ATK")
-m3.metric("🦸 용사 단계", f"Lv.{st.session_state.hero_level} / 50")
-m4.metric("🛡️ 검 단계", f"+{st.session_state.weapon_lvl} / 50")
+    # AI 추천
+    st.subheader("🤖 AI 맞춤 토벌 분석")
+    if st.button("🔍 최적 몬스터 추천받기", type="secondary", use_container_width=True):
+        rec_lvl = recommend_monster(hero_atk, hero_hp)
+        rec_m = get_monster_stats(rec_lvl)
+        st.info(f"💡 AI 추천: **{rec_m['name']}** (승리 확률 85% 이상, 최적 골드 효율)")
+        st.session_state.selected_level = rec_lvl
 
-st.markdown("---")
+# --- [우측: 몬스터 및 전투 연출] ---
+with col2:
+    st.subheader("👾 몬스터 토벌전")
+    
+    default_lvl = st.session_state.get("selected_level", 1)
+    target_level = st.slider("몬스터 단계 (1~50)", 1, 50, value=default_lvl)
+    monster = get_monster_stats(target_level)
 
-col_hero, col_weapon = st.columns(2)
-
-with col_hero:
+    # 몬스터 회전 연출
     st.markdown(f"""
-    <div class='profile-card'>
-        <div class='svg-container'>
-            <svg width="80" height="80" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#00f0ff" stroke-width="3"/><path d="M 20 25 L 80 25 L 75 85 L 50 100 L 25 85 Z" fill="#1A237E" stroke="#00f0ff" stroke-width="3"/><polygon points="50,15 60,35 40,35" fill="#ffd700"/></svg>
+    <div class="magic-circle-container">
+        <div class="magic-circle">
+            {monster['icon']}
         </div>
-        <b>[{get_hero_title(st.session_state.hero_level)}] {st.session_state.hero_name}</b><br>
-        HP: {get_max_hp():,} | ATK: {get_hero_atk():,}
+    </div>
+    <div style="text-align: center;">
+        <h3 style="color:#45a29e;">{monster['name']}</h3>
+        <p>❤️ HP: {monster['hp']:,} | ⚔️ ATK: {monster['atk']:,} | 💎 보상: {monster['reward']:,} G</p>
     </div>
     """, unsafe_allow_html=True)
+
     st.write("")
-    if st.button(f"💪 용사 훈련 (비용: {get_h_cost():,}G)"): enhance_hero()
-
-with col_weapon:
-    st.markdown(f"""
-    <div class='weapon-card-glow'>
-        <div class='svg-container'>
-            <svg width="80" height="80" viewBox="0 0 100 100"><path d="M 42 5 L 50 -5 L 58 5 L 55 65 L 45 65 Z" fill="#FF007F" filter="drop-shadow(0 0 12px #FF007F)"/><polygon points="30,65 70,65 50,75" fill="#FFD700"/></svg>
-        </div>
-        <b>+{st.session_state.weapon_lvl} {get_weapon_name(st.session_state.weapon_lvl)}</b><br>
-        ATK: {get_weapon_atk():,} | 성공률: {int(get_w_rate())}%
-    </div>
-    """, unsafe_allow_html=True)
-    st.write("")
-    if st.button(f"🔨 검 강화 (비용: {get_w_cost():,}G)"): enhance_weapon()
-
-st.markdown("---")
-
-# --- 👹 전투 아레나 ---
-st.subheader("⚔️ 50단계 실시간 격투 아레나")
-
-skip_battle = st.checkbox("⏩ 전투 연출 SKIP (즉시 계산)", value=False)
-m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 50단계)", 1, 50, st.session_state.hero_level)
-monster = get_monster_info(m_step)
-
-st.markdown(f"**상대 Monster**: <span style='color:#ff007f; font-weight:bold;'>{monster['name']}</span> | HP: {monster['hp']:,} | ATK: {monster['atk']:,}", unsafe_allow_html=True)
-
-if st.button("⚡ 전투 개시!", use_container_width=True):
-    hero_hp = get_max_hp()
-    monster_hp = monster["hp"]
-    base_atk = get_total_atk()
     
-    st.markdown("<div class='battle-arena'>", unsafe_allow_html=True)
-    
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown(f"<h4 style='color:#00f0ff; text-align:center;'>🦸 {st.session_state.hero_name}</h4>", unsafe_allow_html=True)
-        hero_bar = st.progress(1.0, text=f"HP: {hero_hp:,} / {get_max_hp():,}")
-    with col_b:
-        st.markdown(f"<h4 style='color:#ff007f; text-align:center;'>👹 {monster['name']}</h4>", unsafe_allow_html=True)
-        monster_bar = st.progress(1.0, text=f"HP: {monster_hp:,} / {monster['hp']:,}")
-    
-    st.markdown("<hr style='border-color: rgba(255,255,255,0.1); margin:10px 0;'>", unsafe_allow_html=True)
-    
-    canvas_box = st.empty()
-    status_display = st.empty()
-    battle_log_box = st.empty()
-    
-    battle_logs = []
-    turn = 1
-    
-    while hero_hp > 0 and monster_hp > 0:
-        is_ultimate = (turn % 4 == 0)
-        turn_render_id = f"t{turn}_{time.time()}"
+    if st.button("⚔️ 전장으로 돌진!", type="primary", use_container_width=True):
+        st.write("---")
+        st.subheader("⚡ 실시간 교전 브리핑")
         
-        # 1. 용사 턴
-        if is_ultimate:
-            atk_mult = 2.5
-            skill_name = "💥 **[필살 3중 차원참]**"
-            if not skip_battle: status_display.markdown("<h3 style='text-align:center; color:#ff007f;'>🔥 [필살기] 차원참 장전 및 십자 격파!!</h3>", unsafe_allow_html=True)
+        h_hp_curr = hero_hp
+        m_hp_curr = monster["hp"]
+        
+        hero_bar = st.progress(1.0, text=f"용사 HP: {h_hp_curr}/{hero_hp}")
+        monster_bar = st.progress(1.0, text=f"{monster['name']} HP: {m_hp_curr}/{monster['hp']}")
+        
+        status_text = st.empty()
+        
+        while h_hp_curr > 0 and m_hp_curr > 0:
+            time.sleep(0.3)
+            
+            # 용사 공격
+            damage = int(hero_atk * random.uniform(0.9, 1.15))
+            m_hp_curr = max(0, m_hp_curr - damage)
+            monster_bar.progress(m_hp_curr / monster["hp"], text=f"{monster['name']} HP: {m_hp_curr}/{monster['hp']}")
+            status_text.markdown(f"🗡️ **성검의 일격!** `{damage}`의 강력한 물리 피해를 입혔습니다.")
+            
+            if m_hp_curr <= 0:
+                break
+                
+            time.sleep(0.3)
+            
+            # 몬스터 반격
+            m_damage = int(monster["atk"] * random.uniform(0.85, 1.1))
+            h_hp_curr = max(0, h_hp_curr - m_damage)
+            hero_bar.progress(h_hp_curr / hero_hp, text=f"용사 HP: {h_hp_curr}/{hero_hp}")
+            status_text.markdown(f"🔥 **{monster['name']}의 공격!** `{m_damage}`의 피해를 입었습니다.")
+
+        st.write("---")
+        if m_hp_curr <= 0:
+            st.balloons()
+            st.success(f"🏆 **토벌 성공!** {monster['name']}를 제압하고 **{monster['reward']:,} G**를 수확했습니다!")
+            st.session_state.gold += monster["reward"]
         else:
-            atk_mult = 1.0
-            skill_name = "🗡️ **[기본 검격]**"
-            if not skip_battle: status_display.markdown(f"<h4 style='text-align:center; color:#00f0ff;'>🗡️ [{turn % 4}/3번째 턴] 용사의 기본 공격!</h4>", unsafe_allow_html=True)
-        
-        is_crit = random.random() < 0.25
-        crit_mult = 1.5 if is_crit else 1.0
-        
-        damage_to_monster = int(base_atk * atk_mult * crit_mult * random.uniform(0.9, 1.1))
-        monster_hp = max(0, monster_hp - damage_to_monster)
-        
-        crit_text = "✨ **CRITICAL!** " if is_crit else ""
-        battle_logs.append(f"<span style='color:#00f0ff;'>[Turn {turn}] 용사의 {skill_name}! {crit_text}<b>{damage_to_monster:,}</b> 피해!</span>")
-        
-        if not skip_battle:
-            monster_bar.progress(monster_hp / monster['hp'], text=f"HP: {monster_hp:,} / {monster['hp']:,}")
-            with canvas_box:
-                components.html(render_canvas_battle(st.session_state.hero_name, monster['name'], m_step, is_ultimate, damage_to_monster, True, st.session_state.hero_level, f"{turn_render_id}_h"), height=240)
-            battle_log_box.markdown("<div class='battle-log-text'>" + "<br>".join(battle_logs[-4:]) + "</div>", unsafe_allow_html=True)
-            time.sleep(0.8)
-            
-        if monster_hp <= 0:
-            break
-            
-        # 2. 몬스터 턴
-        is_m_skill = random.random() < 0.35
-        m_atk_mult = 1.7 if is_m_skill else random.uniform(0.8, 1.1)
-        
-        damage_to_hero = int(monster["atk"] * m_atk_mult)
-        hero_hp = max(0, hero_hp - damage_to_hero)
-        
-        m_skill_text = f"☠️ <b>[{monster['skill']}]</b>" if is_m_skill else "🐾 <b>[일반 반격]</b>"
-        battle_logs.append(f"<span style='color:#ff007f;'>[Turn {turn}] {monster['name']}의 {m_skill_text}! 용사에게 <b>{damage_to_hero:,}</b> 피해!</span>")
-        
-        if not skip_battle:
-            hero_bar.progress(hero_hp / get_max_hp(), text=f"HP: {hero_hp:,} / {get_max_hp():,}")
-            with canvas_box:
-                components.html(render_canvas_battle(st.session_state.hero_name, monster['name'], m_step, False, damage_to_hero, False, st.session_state.hero_level, f"{turn_render_id}_m"), height=240)
-            battle_log_box.markdown("<div class='battle-log-text'>" + "<br>".join(battle_logs[-4:]) + "</div>", unsafe_allow_html=True)
-            time.sleep(0.8)
-            
-        turn += 1
-
-    if skip_battle:
-        hero_bar.progress(hero_hp / get_max_hp(), text=f"HP: {hero_hp:,} / {get_max_hp():,}")
-        monster_bar.progress(monster_hp / monster['hp'], text=f"HP: {monster_hp:,} / {monster['hp']:,}")
-        status_display.markdown("<h3 style='text-align:center; color:#ff007f;'>⚡ 전투 즉시 완료!</h3>", unsafe_allow_html=True)
-        battle_log_box.markdown("<div class='battle-log-text'>" + "<br>".join(battle_logs[-5:]) + "</div>", unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    if monster_hp <= 0:
-        reward = monster['reward']
-        st.session_state.gold += reward
-        st.balloons()
-        st.success(f"🎉 **토벌 완료!** [{monster['name']}]을(를) 물리치고 **{reward:,} Gold**를 획득했습니다!")
-        st.session_state.log.append(f"🏆 [{monster['name']}] 토벌 성공 (+{reward:,} G)")
-    else:
-        penalty = int(monster['reward'] * 0.1)
-        st.session_state.gold = max(0, st.session_state.gold - penalty)
-        st.error(f"☠️ **전투 패배...** 지불 비용 {penalty:,} Gold를 잃었습니다.")
-        st.session_state.log.append(f"💀 [{monster['name']}] 사냥 실패 (-{penalty:,} G)")
-
-st.markdown("---")
-with st.expander("📜 최근 모험 기록"):
-    for log in reversed(st.session_state.log[-5:]):
-        st.write(log)
+            st.error("☠️ **패배...** 성검을 추가 제련하거나 용사를 레벨업한 뒤 다시 도전하세요.")
