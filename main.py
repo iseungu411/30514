@@ -6,7 +6,7 @@ import time
 # -------------------------------------------------------------------
 # 1. 페이지 및 Cyberpunk Neon Style 설정
 # -------------------------------------------------------------------
-st.set_page_config(page_title="NEON RPG: REBIRTH OVERDRIVE", page_icon="🌌", layout="centered")
+st.set_page_config(page_title="NEON RPG: CELESTIAL OVERDRIVE", page_icon="🌌", layout="centered")
 
 st.markdown("""
     <style>
@@ -14,8 +14,8 @@ st.markdown("""
 
     .stApp {
         background: 
-            radial-gradient(circle at 50% 20%, rgba(255, 0, 127, 0.35) 0%, transparent 60%),
-            radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.3) 0%, transparent 60%),
+            radial-gradient(circle at 50% 15%, rgba(255, 0, 127, 0.4) 0%, transparent 60%),
+            radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.35) 0%, transparent 60%),
             linear-gradient(180deg, #050010 0%, #010003 100%);
         color: #ffffff;
         font-family: 'Noto Sans KR', sans-serif;
@@ -24,7 +24,7 @@ st.markdown("""
     .game-title {
         font-family: 'Orbitron', sans-serif;
         text-align: center;
-        font-size: 2.5rem;
+        font-size: 2.6rem;
         font-weight: 900;
         letter-spacing: 4px;
         background: linear-gradient(180deg, #fff 0%, #ffd700 30%, #00f0ff 70%, #ff007f 100%);
@@ -35,13 +35,13 @@ st.markdown("""
     }
 
     .profile-card, .weapon-card-glow {
-        background: rgba(10, 2, 22, 0.88);
+        background: rgba(10, 2, 22, 0.9);
         backdrop-filter: blur(16px);
         border: 2px solid rgba(0, 240, 255, 0.8);
         border-radius: 20px;
         padding: 18px;
         text-align: center;
-        box-shadow: 0 0 30px rgba(0, 240, 255, 0.4), inset 0 0 20px rgba(0, 240, 255, 0.2);
+        box-shadow: 0 0 35px rgba(0, 240, 255, 0.4), inset 0 0 20px rgba(0, 240, 255, 0.2);
     }
     .weapon-card-glow { 
         border-color: rgba(255, 0, 127, 0.9); 
@@ -49,7 +49,7 @@ st.markdown("""
     }
 
     .svg-container {
-        width: 100%; height: 130px;
+        width: 100%; height: 140px;
         display: flex; justify-content: center; align-items: center;
         background: radial-gradient(circle, rgba(0, 240, 255, 0.2) 0%, rgba(0,0,0,0.95) 100%);
         border-radius: 14px; margin-bottom: 12px;
@@ -105,52 +105,51 @@ def safe_rerun():
     elif hasattr(st, "experimental_rerun"): st.experimental_rerun()
 
 # -------------------------------------------------------------------
-# 2. 다채로워진 무기(12종) 및 용사(5단계 외형) SVG 리소스
+# 2. 무기 및 10단계 초간지 용사 SVG 리소스
 # -------------------------------------------------------------------
 WEAPON_SVGS = [
-    # 0: 녹슨 단검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b0bec5"/><stop offset="100%" stop-color="#37474f"/></linearGradient></defs><path d="M50 15 L56 60 L50 65 L44 60 Z" fill="url(#g0)" stroke="#102027" stroke-width="1.5"/><rect x="42" y="65" width="16" height="4" fill="#546e7a" rx="1"/><rect x="47" y="69" width="6" height="18" fill="#37474f"/><circle cx="50" cy="89" r="4" fill="#78909c"/></svg>''',
-    # 1: 강철 장검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e0e0e0"/><stop offset="50%" stop-color="#9e9e9e"/><stop offset="100%" stop-color="#424242"/></linearGradient></defs><path d="M50 8 L57 65 L50 72 L43 65 Z" fill="url(#g1)" stroke="#212121" stroke-width="1.5"/><line x1="50" y1="12" x2="50" y2="65" stroke="#ffffff" stroke-width="1"/><path d="M35 72 L65 72 L50 78 Z" fill="#757575"/><rect x="47" y="78" width="6" height="16" fill="#212121"/></svg>''',
-    # 2: 룬 각인 검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#1a237e"/></linearGradient><filter id="f2"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M50 5 L58 65 L50 72 L42 65 Z" fill="url(#g2)" stroke="#00b0ff" stroke-width="1.5"/><path d="M50 15 L50 55" stroke="#ffffff" stroke-width="2" filter="url(#f2)"/><polygon points="32,70 68,70 50,78" fill="#00b0ff" filter="url(#f2)"/><circle cx="50" cy="40" r="4" fill="#ffffff" filter="url(#f2)"/></svg>''',
-    # 3: 엘프의 명검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b9f6ca"/><stop offset="50%" stop-color="#00e676"/><stop offset="100%" stop-color="#1b5e20"/></linearGradient><filter id="f3"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#69f0ae"/></filter></defs><path d="M50 5 Q58 35 56 65 L50 72 Q42 35 44 65 Z" fill="url(#g3)" stroke="#00c853" stroke-width="1.5" filter="url(#f3)"/><path d="M35 68 C45 68 45 78 50 82 C55 78 55 68 65 68 C55 74 45 74 35 68 Z" fill="#00e676"/><rect x="47" y="82" width="6" height="14" fill="#2e7d32" rx="2"/></svg>''',
-    # 4: 화염 블레이드
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g4_1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff9100"/><stop offset="100%" stop-color="#ff3d00"/></linearGradient><filter id="f4_1"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff3d00"/></filter></defs><path d="M50 2 C65 30 55 55 56 68 L50 74 L44 68 C45 55 35 30 50 2 Z" fill="url(#g4_1)" filter="url(#f4_1)"/><rect x="40" y="74" width="20" height="5" fill="#d50000"/><rect x="47" y="79" width="6" height="16" fill="#3e2723"/></svg>''',
-    # 5: 영웅의 성검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fff59d"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#ff6f00"/></linearGradient><filter id="f4"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffea00"/></filter></defs><path d="M50 2 L60 62 L50 70 L40 62 Z" fill="url(#g4)" stroke="#ffab00" stroke-width="1.5" filter="url(#f4)"/><line x1="50" y1="8" x2="50" y2="60" stroke="#ffffff" stroke-width="2.5"/><path d="M25 66 L75 66 L50 76 Z" fill="#ffc107" filter="url(#f4)"/><polygon points="50,60 55,68 50,74 45,68" fill="#ffffff"/></svg>''',
-    # 6: 용살자의 대검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff3d00"/><stop offset="50%" stop-color="#dd2c00"/><stop offset="100%" stop-color="#3e2723"/></linearGradient><filter id="f5"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ff3d00"/></filter></defs><path d="M46 2 L54 2 L62 60 L50 72 L38 60 Z" fill="url(#g5)" stroke="#bf360c" stroke-width="2" filter="url(#f5)"/><path d="M48 10 L52 10 L55 55 L50 60 L45 55 Z" fill="#ff9e80"/><path d="M22 62 L78 62 L50 75 Z" fill="#d50000" filter="url(#f5)"/><circle cx="50" cy="68" r="5" fill="#ffeb3b"/></svg>''',
-    # 7: 플라즈마 레이피어
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g7_1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#7000ff"/></linearGradient><filter id="f7_1"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#00f0ff"/></filter></defs><path d="M49 0 L51 0 L53 65 L50 72 L47 65 Z" fill="url(#g7_1)" filter="url(#f7_1)"/><circle cx="50" cy="74" r="12" fill="none" stroke="#00f0ff" stroke-width="3"/><rect x="48" y="80" width="4" height="15" fill="#ffffff"/></svg>''',
-    # 8: 차원 파괴검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00f0ff"/><stop offset="50%" stop-color="#7000ff"/><stop offset="100%" stop-color="#ff007f"/></linearGradient><filter id="f6"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M50 0 L63 58 L50 68 L37 58 Z" fill="url(#g6)" stroke="#00f0ff" stroke-width="2" filter="url(#f6)"/><polygon points="50,5 55,25 50,45 45,25" fill="#ffffff" filter="url(#f6)"/><path d="M20 62 L80 62 L50 76 Z" fill="#7000ff" stroke="#00f0ff" stroke-width="1.5"/><circle cx="50" cy="69" r="6" fill="#00f0ff" filter="url(#f6)"/></svg>''',
-    # 9: 아포칼립스 낫
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><filter id="f9"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/></filter></defs><path d="M48 10 L52 10 L50 90 Z" fill="#333"/><path d="M50 12 C75 -5 90 20 85 40 C70 25 55 20 50 25 Z" fill="#ff007f" filter="url(#f9)"/></svg>''',
-    # 10: 갤럭시 세이버
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g10" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#ff007f"/></linearGradient><filter id="f10"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#00f0ff"/></filter></defs><polygon points="50,-5 60,60 50,68 40,60" fill="url(#g10)" filter="url(#f10)"/><circle cx="50" cy="74" r="8" fill="#ffd700"/></svg>''',
-    # 11: 🌌 신멸의 절망검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#ff007f"/><stop offset="70%" stop-color="#7000ff"/><stop offset="100%" stop-color="#00f0ff"/></linearGradient><filter id="f7"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/></filter></defs><path d="M50 -5 L65 58 L50 70 L35 58 Z" fill="url(#g7)" filter="url(#f7)"/><path d="M48 5 L52 5 L56 50 L50 58 L44 50 Z" fill="#ffffff"/><polygon points="15,60 85,60 50,80" fill="#110022" stroke="#ffd700" stroke-width="2.5" filter="url(#f7)"/><circle cx="50" cy="70" r="7" fill="#ffd700" filter="url(#f7)"/><polygon points="50,20 54,28 50,36 46,28" fill="#00f0ff"/></svg>'''
 ]
 
+# --- 10단계 초간지 용사 SVG 연출 ---
 def get_hero_svg(lvl):
-    if lvl < 10:
-        return '''<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#78909c" stroke-width="1.5"/><path d="M30 85 L50 45 L70 85 Z" fill="#455a64"/><circle cx="50" cy="38" r="16" fill="#ffe0b2"/><path d="M36 28 C36 18 64 18 64 28 Z" fill="#78909c"/><circle cx="44" cy="38" r="2" fill="#212121"/><circle cx="56" cy="38" r="2" fill="#212121"/></svg>'''
-    elif lvl < 20:
-        return '''<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="4 3"/><path d="M25 85 L50 40 L75 85 Z" fill="#263238" stroke="#00b0ff" stroke-width="1.5"/><circle cx="50" cy="36" r="18" fill="#eceff1"/><polygon points="32,22 50,8 68,22" fill="#00e5ff"/><rect x="42" y="32" width="16" height="4" fill="#00b0ff"/></svg>'''
-    elif lvl < 30:
-        return '''<svg width="100" height="100" viewBox="0 0 100 100"><defs><filter id="hf1"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffd700"/></filter></defs><path d="M 10 50 Q -5 10 40 25 Z" fill="#ffd700" filter="url(#hf1)"/><path d="M 90 50 Q 105 10 60 25 Z" fill="#ffd700" filter="url(#hf1)"/><path d="M22 88 L50 35 L78 88 Z" fill="#37474f" stroke="#ffd700" stroke-width="2"/><circle cx="50" cy="34" r="20" fill="#ffffff" filter="url(#hf1)"/><polygon points="20,20 35,2 50,15 65,2 80,20" fill="#ffab00"/></svg>'''
-    elif lvl < 40:
-        return '''<svg width="100" height="100" viewBox="0 0 100 100"><defs><filter id="hf_purple"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#a100ff"/></filter></defs><circle cx="50" cy="50" r="44" fill="none" stroke="#a100ff" stroke-width="2"/><path d="M20 85 L50 30 L80 85 Z" fill="#1a0033" stroke="#a100ff" stroke-width="2"/><circle cx="50" cy="32" r="20" fill="#e1bee7" filter="url(#hf_purple)"/><polygon points="25,15 50,-2 75,15 50,22" fill="#7b1fa2"/></svg>'''
-    else:
-        return '''<svg width="100" height="100" viewBox="0 0 100 100"><defs><filter id="hf2"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/></filter></defs><circle cx="50" cy="50" r="45" fill="none" stroke="#ffd700" stroke-width="2.5" filter="url(#hf2)"/><path d="M 0 50 Q -20 -10 45 15 Z" fill="rgba(255,0,127,0.8)" filter="url(#hf2)"/><path d="M 100 50 Q 120 -10 55 15 Z" fill="rgba(0,240,255,0.8)" filter="url(#hf2)"/><path d="M18 90 L50 28 L82 90 Z" fill="#110022" stroke="#ff007f" stroke-width="2.5"/><circle cx="50" cy="30" r="22" fill="#ffffff" filter="url(#hf2)"/><polygon points="15,15 32,-5 50,10 68,-5 85,15" fill="#ffd700" filter="url(#hf2)"/></svg>'''
+    if lvl <= 5: # 1단계: 사이버 비기너
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><polygon points="30,85 50,45 70,85" fill="#37474f" stroke="#78909c" stroke-width="2"/><circle cx="50" cy="35" r="16" fill="#eceff1"/><path d="M38 25 L62 25 L50 12 Z" fill="#546e7a"/><circle cx="45" cy="35" r="3" fill="#00f0ff"/><circle cx="55" cy="35" r="3" fill="#00f0ff"/></svg>'''
+    elif lvl <= 10: # 2단계: 네온 가디언
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g2"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#00f0ff"/></filter></defs><path d="M25 88 L50 40 L75 88 Z" fill="#1a237e" stroke="#00f0ff" stroke-width="2" filter="url(#h_g2)"/><circle cx="50" cy="32" r="17" fill="#263238"/><path d="M34 28 C34 10 66 10 66 28 Z" fill="#00b0ff" filter="url(#h_g2)"/><rect x="40" y="30" width="20" height="4" fill="#ffffff" filter="url(#h_g2)"/></svg>'''
+    elif lvl <= 15: # 3단계: 플라즈마 스트라이커
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g3"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#7000ff"/></filter></defs><path d="M15 70 L35 45 L20 30 Z" fill="#7000ff"/><path d="M85 70 L65 45 L80 30 Z" fill="#7000ff"/><polygon points="25,88 50,35 75,88" fill="#0d47a1" stroke="#7000ff" stroke-width="2" filter="url(#h_g3)"/><circle cx="50" cy="30" r="18" fill="#ffffff"/><polygon points="32,20 50,2 68,20" fill="#7000ff" filter="url(#h_g3)"/></svg>'''
+    elif lvl <= 20: # 4단계: 네온 스페셜리스트
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g4"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/></filter></defs><path d="M10 80 Q 20 20 45 35 Z" fill="#ff007f" filter="url(#h_g4)"/><path d="M90 80 Q 80 20 55 35 Z" fill="#ff007f" filter="url(#h_g4)"/><polygon points="22,90 50,30 78,90" fill="#212121" stroke="#ff007f" stroke-width="2.5"/><circle cx="50" cy="28" r="19" fill="#00f0ff" filter="url(#h_g4)"/><line x1="32" y1="28" x2="68" y2="28" stroke="#ffffff" stroke-width="3"/></svg>'''
+    elif lvl <= 25: # 5단계: 영웅 챔피언
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g5"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ffd700"/></filter></defs><path d="M5 85 L35 45 L20 20 Z" fill="#ffd700" filter="url(#h_g5)"/><path d="M95 85 L65 45 L80 20 Z" fill="#ffd700" filter="url(#h_g5)"/><polygon points="20,90 50,28 80,90" fill="#1b003a" stroke="#ffd700" stroke-width="2.5"/><circle cx="50" cy="26" r="20" fill="#ffffff" filter="url(#h_g5)"/><polygon points="28,14 50,-2 72,14" fill="#ffd700"/></svg>'''
+    elif lvl <= 30: # 6단계: 전설의 네온 마스터
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g6"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#00f0ff"/></filter></defs><path d="M 0 50 C 10 10 40 20 45 30 C 20 40 10 70 0 50 Z" fill="#00f0ff" filter="url(#h_g6)"/><path d="M 100 50 C 90 10 60 20 55 30 C 80 40 90 70 100 50 Z" fill="#00f0ff" filter="url(#h_g6)"/><polygon points="20,92 50,25 80,92" fill="#000511" stroke="#00f0ff" stroke-width="3"/><circle cx="50" cy="25" r="21" fill="#ff007f" filter="url(#h_g6)"/><polygon points="30,8 50,-6 70,8" fill="#ffffff" filter="url(#h_g6)"/></svg>'''
+    elif lvl <= 35: # 7단계: 신화의 오버로드
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g7"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#7000ff"/></filter></defs><path d="M -5 80 L 35 40 L 15 10 Z" fill="#ff007f" filter="url(#h_g7)"/><path d="M 105 80 L 65 40 L 85 10 Z" fill="#ff007f" filter="url(#h_g7)"/><polygon points="18,92 50,22 82,92" fill="#0a0014" stroke="#ff007f" stroke-width="3"/><circle cx="50" cy="22" r="22" fill="#ffffff" filter="url(#h_g7)"/><polygon points="22,8 50,-8 78,8" fill="#7000ff" filter="url(#h_g7)"/></svg>'''
+    elif lvl <= 40: # 8단계: 차원 초월자
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g8"><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/><feDropShadow dx="0" dy="0" stdDeviation="15" flood-color="#ffd700"/></filter></defs><circle cx="50" cy="50" r="46" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="8 4" filter="url(#h_g8)"/><path d="M -10 60 Q 15 -10 45 20 Z" fill="#ffd700" filter="url(#h_g8)"/><path d="M 110 60 Q 85 -10 55 20 Z" fill="#ffd700" filter="url(#h_g8)"/><polygon points="16,92 50,18 84,92" fill="#000" stroke="#ffd700" stroke-width="3"/><circle cx="50" cy="20" r="23" fill="#00f0ff" filter="url(#h_g8)"/><polygon points="20,2 50,-12 80,2" fill="#ff007f" filter="url(#h_g8)"/></svg>'''
+    elif lvl <= 45: # 9단계: 시공간 파괴자
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g9"><feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#ff0055"/><feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#00f0ff"/></filter></defs><path d="M -15 90 C -5 -20 40 10 48 20 C 15 30 0 80 -15 90 Z" fill="#ff0055" filter="url(#h_g9)"/><path d="M 115 90 C 105 -20 60 10 52 20 C 85 30 100 80 115 90 Z" fill="#ff0055" filter="url(#h_g9)"/><polygon points="15,95 50,15 85,95" fill="#030008" stroke="#00f0ff" stroke-width="3.5" filter="url(#h_g9)"/><circle cx="50" cy="18" r="24" fill="#ffffff" filter="url(#h_g9)"/><polygon points="15,-2 50,-16 85,-2" fill="#ffd700" filter="url(#h_g9)"/></svg>'''
+    else: # 10단계: 🌌 차원 절대신
+        return '''<svg width="120" height="120" viewBox="0 0 100 100"><defs><filter id="h_g10"><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#ffd700"/><feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="30" flood-color="#00f0ff"/></filter></defs><circle cx="50" cy="50" r="48" fill="none" stroke="#ffd700" stroke-width="3" filter="url(#h_g10)"/><path d="M -20 70 Q -10 -30 45 10 Z" fill="rgba(0, 240, 255, 0.9)" filter="url(#h_g10)"/><path d="M 120 70 Q 110 -30 55 10 Z" fill="rgba(255, 0, 127, 0.9)" filter="url(#h_g10)"/><polygon points="12,95 50,10 88,95" fill="#000000" stroke="#ffffff" stroke-width="4" filter="url(#h_g10)"/><circle cx="50" cy="15" r="25" fill="#ffffff" filter="url(#h_g10)"/><polygon points="10,-5 50,-22 90,-5" fill="#ffd700" filter="url(#h_g10)"/></svg>'''
 
 def get_hero_title(lvl):
     titles = [
-        "초보 모험가", "노련한 용병", "숙련된 기사", 
-        "정예 아카데미 스페셜리스트", "영웅 챔피언", "전설의 마스터", 
-        "신화의 오버로드", "차원 초월자", "우주 소멸자", "🌌 차원 절대신"
+        "사이버 비기너", "네온 가디언", "플라즈마 스트라이커", 
+        "네온 스페셜리스트", "영웅 챔피언", "전설의 네온 마스터", 
+        "신화의 오버로드", "차원 초월자", "⚡ 시공간 파괴자", "🌌 차원 절대신"
     ]
     idx = min((lvl - 1) // 5, len(titles) - 1)
     return titles[idx]
@@ -273,6 +272,9 @@ def enhance_hero():
     st.toast(f"🦸 레벨 업! (Lv.{st.session_state.hero_level})", icon="💪")
     safe_rerun()
 
+# -------------------------------------------------------------------
+# HTML5 Canvas 하이테크 전투 연출 (필살기 및 용사 아우라 극대화)
+# -------------------------------------------------------------------
 def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, damage, is_hero_turn, hero_level, render_id):
     is_final_boss = (monster_step == 50)
     html_code = f"""
@@ -291,10 +293,11 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
 
         function animate() {{
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (isUlt && isHeroTurn && frame >= 10 && frame <= 20) {{
-                ctx.setTransform(1, 0, 0, 1, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
+            if (isUlt && isHeroTurn && frame >= 8 && frame <= 22) {{
+                ctx.setTransform(1, 0, 0, 1, (Math.random() - 0.5) * 22, (Math.random() - 0.5) * 22);
             }} else {{ ctx.setTransform(1, 0, 0, 1, 0, 0); }}
 
+            // 배경 격자
             ctx.strokeStyle = isFinalBoss ? 'rgba(255, 215, 0, 0.2)' : 'rgba(0, 240, 255, 0.1)';
             ctx.lineWidth = 1;
             for(let x=0; x<canvas.width; x+=30) {{ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }}
@@ -311,14 +314,27 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 else mX += (frame - 20) * 18;
             }}
             
+            // 용사 연출 (레벨별 삼각 아우라)
             ctx.save();
-            ctx.shadowColor = hLvl >= 40 ? '#ff007f' : '#00f0ff';
+            let auraColor = hLvl >= 40 ? '#ffd700' : (hLvl >= 20 ? '#ff007f' : '#00f0ff');
+            ctx.shadowColor = auraColor;
             ctx.shadowBlur = 20 + hLvl;
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath(); ctx.arc(hX, 110, 20 + (hLvl > 30 ? 6 : 0), 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 25, 155);
+            
+            // 용사 아바타 (화려한 차원 다각형)
+            ctx.fillStyle = auraColor;
+            ctx.beginPath();
+            ctx.moveTo(hX, 110 - (20 + hLvl*0.2));
+            ctx.lineTo(hX - (18 + hLvl*0.2), 110 + (20 + hLvl*0.2));
+            ctx.lineTo(hX + (18 + hLvl*0.2), 110 + (20 + hLvl*0.2));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Orbitron';
+            ctx.fillText('{hero_name}', hX - 25, 160);
             ctx.restore();
             
+            // 몬스터 연출
             ctx.save();
             if (isFinalBoss) {{
                 let size = 55 + Math.sin(frame*0.2)*8;
@@ -330,16 +346,22 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 let boxSize = 36 + Math.min(mStep, 50) * 0.5;
                 ctx.fillRect(mX - boxSize/2, 110 - boxSize/2, boxSize, boxSize);
             }}
-            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 40, 160);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 40, 165);
             ctx.restore();
             
+            // 타격 이펙트 & 데미지 텍스트
             if (strike) {{
                 ctx.save();
                 ctx.strokeStyle = isHeroTurn ? (isUlt ? '#ffd700' : '#00f0ff') : '#ff007f';
-                ctx.shadowBlur = 25; ctx.lineWidth = isUlt ? 12 : 7;
-                ctx.beginPath(); ctx.moveTo(mX - 40, 50); ctx.lineTo(mX + 40, 160); ctx.stroke();
-                ctx.fillStyle = isUlt ? '#ffd700' : '#ffff00'; ctx.font = '900 28px Orbitron';
-                ctx.fillText('-' + damage.toLocaleString(), (isHeroTurn ? mX : hX) - 30, 40);
+                ctx.shadowBlur = 30; ctx.lineWidth = isUlt ? 15 : 7;
+                ctx.beginPath(); ctx.moveTo(mX - 50, 40); ctx.lineTo(mX + 50, 170); ctx.stroke();
+                
+                if(isUlt) {{
+                    ctx.beginPath(); ctx.moveTo(mX + 50, 40); ctx.lineTo(mX - 50, 170); ctx.stroke();
+                }}
+
+                ctx.fillStyle = isUlt ? '#ffd700' : '#ffff00'; ctx.font = '900 30px Orbitron';
+                ctx.fillText('-' + damage.toLocaleString(), (isHeroTurn ? mX : hX) - 35, 35);
                 ctx.restore();
             }}
             frame++;
@@ -376,7 +398,7 @@ with col_hero:
     </div>
     """, unsafe_allow_html=True)
     st.write("")
-    if st.button(f"💪 용사 훈련 ({get_h_cost():,}G)"): enhance_hero()
+    if st.button(f"💪 용사 각성 ({get_h_cost():,}G)"): enhance_hero()
 
 with col_weapon:
     st.markdown(f"""
@@ -433,11 +455,11 @@ if st.button("⚡ 전투 개시!", use_container_width=True):
         is_ultimate = (turn % 4 == 0)
         if is_ultimate:
             atk_mult = 3.0
-            skill_name = "💥 **[필살 차원 참격]**"
-            if not skip_battle: status_display.markdown("<h3 style='text-align:center; color:#ffd700;'>🔥 [4번째 턴] 필살 차원 참격 폭발!!</h3>", unsafe_allow_html=True)
+            skill_name = "💥 **[초월적 차원 붕괴참]**"
+            if not skip_battle: status_display.markdown("<h3 style='text-align:center; color:#ffd700;'>🔥 [4번째 턴] 초월적 차원 붕괴참 폭발!!</h3>", unsafe_allow_html=True)
         else:
             atk_mult = 1.0
-            skill_name = "🗡️ **[기본 검격]**"
+            skill_name = "🗡️ **[네온 플라즈마 참격]**"
             if not skip_battle: status_display.markdown(f"<h4 style='text-align:center; color:#00f0ff;'>🗡️ [{turn % 4}/3번째 턴] 용사의 검격!</h4>", unsafe_allow_html=True)
         
         is_crit = random.random() < 0.25
