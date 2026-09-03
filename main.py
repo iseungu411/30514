@@ -105,40 +105,63 @@ def safe_rerun():
     elif hasattr(st, "experimental_rerun"): st.experimental_rerun()
 
 # -------------------------------------------------------------------
-# 2. 무기 및 용사 SVG 리소스
+# 2. 다채로워진 무기(12종) 및 용사(5단계 외형) SVG 리소스
 # -------------------------------------------------------------------
 WEAPON_SVGS = [
+    # 0: 녹슨 단검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b0bec5"/><stop offset="100%" stop-color="#37474f"/></linearGradient></defs><path d="M50 15 L56 60 L50 65 L44 60 Z" fill="url(#g0)" stroke="#102027" stroke-width="1.5"/><rect x="42" y="65" width="16" height="4" fill="#546e7a" rx="1"/><rect x="47" y="69" width="6" height="18" fill="#37474f"/><circle cx="50" cy="89" r="4" fill="#78909c"/></svg>''',
+    # 1: 강철 장검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e0e0e0"/><stop offset="50%" stop-color="#9e9e9e"/><stop offset="100%" stop-color="#424242"/></linearGradient></defs><path d="M50 8 L57 65 L50 72 L43 65 Z" fill="url(#g1)" stroke="#212121" stroke-width="1.5"/><line x1="50" y1="12" x2="50" y2="65" stroke="#ffffff" stroke-width="1"/><path d="M35 72 L65 72 L50 78 Z" fill="#757575"/><rect x="47" y="78" width="6" height="16" fill="#212121"/></svg>''',
+    # 2: 룬 각인 검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#1a237e"/></linearGradient><filter id="f2"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M50 5 L58 65 L50 72 L42 65 Z" fill="url(#g2)" stroke="#00b0ff" stroke-width="1.5"/><path d="M50 15 L50 55" stroke="#ffffff" stroke-width="2" filter="url(#f2)"/><polygon points="32,70 68,70 50,78" fill="#00b0ff" filter="url(#f2)"/><circle cx="50" cy="40" r="4" fill="#ffffff" filter="url(#f2)"/></svg>''',
+    # 3: 엘프의 명검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b9f6ca"/><stop offset="50%" stop-color="#00e676"/><stop offset="100%" stop-color="#1b5e20"/></linearGradient><filter id="f3"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#69f0ae"/></filter></defs><path d="M50 5 Q58 35 56 65 L50 72 Q42 35 44 65 Z" fill="url(#g3)" stroke="#00c853" stroke-width="1.5" filter="url(#f3)"/><path d="M35 68 C45 68 45 78 50 82 C55 78 55 68 65 68 C55 74 45 74 35 68 Z" fill="#00e676"/><rect x="47" y="82" width="6" height="14" fill="#2e7d32" rx="2"/></svg>''',
+    # 4: 화염 블레이드
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g4_1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff9100"/><stop offset="100%" stop-color="#ff3d00"/></linearGradient><filter id="f4_1"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff3d00"/></filter></defs><path d="M50 2 C65 30 55 55 56 68 L50 74 L44 68 C45 55 35 30 50 2 Z" fill="url(#g4_1)" filter="url(#f4_1)"/><rect x="40" y="74" width="20" height="5" fill="#d50000"/><rect x="47" y="79" width="6" height="16" fill="#3e2723"/></svg>''',
+    # 5: 영웅의 성검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fff59d"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#ff6f00"/></linearGradient><filter id="f4"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffea00"/></filter></defs><path d="M50 2 L60 62 L50 70 L40 62 Z" fill="url(#g4)" stroke="#ffab00" stroke-width="1.5" filter="url(#f4)"/><line x1="50" y1="8" x2="50" y2="60" stroke="#ffffff" stroke-width="2.5"/><path d="M25 66 L75 66 L50 76 Z" fill="#ffc107" filter="url(#f4)"/><polygon points="50,60 55,68 50,74 45,68" fill="#ffffff"/></svg>''',
+    # 6: 용살자의 대검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff3d00"/><stop offset="50%" stop-color="#dd2c00"/><stop offset="100%" stop-color="#3e2723"/></linearGradient><filter id="f5"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ff3d00"/></filter></defs><path d="M46 2 L54 2 L62 60 L50 72 L38 60 Z" fill="url(#g5)" stroke="#bf360c" stroke-width="2" filter="url(#f5)"/><path d="M48 10 L52 10 L55 55 L50 60 L45 55 Z" fill="#ff9e80"/><path d="M22 62 L78 62 L50 75 Z" fill="#d50000" filter="url(#f5)"/><circle cx="50" cy="68" r="5" fill="#ffeb3b"/></svg>''',
+    # 7: 플라즈마 레이피어
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g7_1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#7000ff"/></linearGradient><filter id="f7_1"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#00f0ff"/></filter></defs><path d="M49 0 L51 0 L53 65 L50 72 L47 65 Z" fill="url(#g7_1)" filter="url(#f7_1)"/><circle cx="50" cy="74" r="12" fill="none" stroke="#00f0ff" stroke-width="3"/><rect x="48" y="80" width="4" height="15" fill="#ffffff"/></svg>''',
+    # 8: 차원 파괴검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00f0ff"/><stop offset="50%" stop-color="#7000ff"/><stop offset="100%" stop-color="#ff007f"/></linearGradient><filter id="f6"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M50 0 L63 58 L50 68 L37 58 Z" fill="url(#g6)" stroke="#00f0ff" stroke-width="2" filter="url(#f6)"/><polygon points="50,5 55,25 50,45 45,25" fill="#ffffff" filter="url(#f6)"/><path d="M20 62 L80 62 L50 76 Z" fill="#7000ff" stroke="#00f0ff" stroke-width="1.5"/><circle cx="50" cy="69" r="6" fill="#00f0ff" filter="url(#f6)"/></svg>''',
+    # 9: 아포칼립스 낫
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><filter id="f9"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/></filter></defs><path d="M48 10 L52 10 L50 90 Z" fill="#333"/><path d="M50 12 C75 -5 90 20 85 40 C70 25 55 20 50 25 Z" fill="#ff007f" filter="url(#f9)"/></svg>''',
+    # 10: 갤럭시 세이버
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g10" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#ff007f"/></linearGradient><filter id="f10"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#00f0ff"/></filter></defs><polygon points="50,-5 60,60 50,68 40,60" fill="url(#g10)" filter="url(#f10)"/><circle cx="50" cy="74" r="8" fill="#ffd700"/></svg>''',
+    # 11: 🌌 신멸의 절망검
     '''<svg width="110" height="110" viewBox="0 0 100 100"><defs><linearGradient id="g7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#ff007f"/><stop offset="70%" stop-color="#7000ff"/><stop offset="100%" stop-color="#00f0ff"/></linearGradient><filter id="f7"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/></filter></defs><path d="M50 -5 L65 58 L50 70 L35 58 Z" fill="url(#g7)" filter="url(#f7)"/><path d="M48 5 L52 5 L56 50 L50 58 L44 50 Z" fill="#ffffff"/><polygon points="15,60 85,60 50,80" fill="#110022" stroke="#ffd700" stroke-width="2.5" filter="url(#f7)"/><circle cx="50" cy="70" r="7" fill="#ffd700" filter="url(#f7)"/><polygon points="50,20 54,28 50,36 46,28" fill="#00f0ff"/></svg>'''
 ]
 
 def get_hero_svg(lvl):
     if lvl < 10:
         return '''<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#78909c" stroke-width="1.5"/><path d="M30 85 L50 45 L70 85 Z" fill="#455a64"/><circle cx="50" cy="38" r="16" fill="#ffe0b2"/><path d="M36 28 C36 18 64 18 64 28 Z" fill="#78909c"/><circle cx="44" cy="38" r="2" fill="#212121"/><circle cx="56" cy="38" r="2" fill="#212121"/></svg>'''
-    elif lvl < 25:
+    elif lvl < 20:
         return '''<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#00f0ff" stroke-width="2" stroke-dasharray="4 3"/><path d="M25 85 L50 40 L75 85 Z" fill="#263238" stroke="#00b0ff" stroke-width="1.5"/><circle cx="50" cy="36" r="18" fill="#eceff1"/><polygon points="32,22 50,8 68,22" fill="#00e5ff"/><rect x="42" y="32" width="16" height="4" fill="#00b0ff"/></svg>'''
-    elif lvl < 40:
+    elif lvl < 30:
         return '''<svg width="100" height="100" viewBox="0 0 100 100"><defs><filter id="hf1"><feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffd700"/></filter></defs><path d="M 10 50 Q -5 10 40 25 Z" fill="#ffd700" filter="url(#hf1)"/><path d="M 90 50 Q 105 10 60 25 Z" fill="#ffd700" filter="url(#hf1)"/><path d="M22 88 L50 35 L78 88 Z" fill="#37474f" stroke="#ffd700" stroke-width="2"/><circle cx="50" cy="34" r="20" fill="#ffffff" filter="url(#hf1)"/><polygon points="20,20 35,2 50,15 65,2 80,20" fill="#ffab00"/></svg>'''
+    elif lvl < 40:
+        return '''<svg width="100" height="100" viewBox="0 0 100 100"><defs><filter id="hf_purple"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#a100ff"/></filter></defs><circle cx="50" cy="50" r="44" fill="none" stroke="#a100ff" stroke-width="2"/><path d="M20 85 L50 30 L80 85 Z" fill="#1a0033" stroke="#a100ff" stroke-width="2"/><circle cx="50" cy="32" r="20" fill="#e1bee7" filter="url(#hf_purple)"/><polygon points="25,15 50,-2 75,15 50,22" fill="#7b1fa2"/></svg>'''
     else:
         return '''<svg width="100" height="100" viewBox="0 0 100 100"><defs><filter id="hf2"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ff007f"/><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00f0ff"/></filter></defs><circle cx="50" cy="50" r="45" fill="none" stroke="#ffd700" stroke-width="2.5" filter="url(#hf2)"/><path d="M 0 50 Q -20 -10 45 15 Z" fill="rgba(255,0,127,0.8)" filter="url(#hf2)"/><path d="M 100 50 Q 120 -10 55 15 Z" fill="rgba(0,240,255,0.8)" filter="url(#hf2)"/><path d="M18 90 L50 28 L82 90 Z" fill="#110022" stroke="#ff007f" stroke-width="2.5"/><circle cx="50" cy="30" r="22" fill="#ffffff" filter="url(#hf2)"/><polygon points="15,15 32,-5 50,10 68,-5 85,15" fill="#ffd700" filter="url(#hf2)"/></svg>'''
 
 def get_hero_title(lvl):
-    if lvl < 10: return "초보 모험가"
-    elif lvl < 20: return "숙련된 기사"
-    elif lvl < 30: return "영웅 챔피언"
-    elif lvl < 40: return "전설의 마스터"
-    elif lvl < 50: return "신화의 오버로드"
-    else: return "🌌 차원 절대신"
+    titles = [
+        "초보 모험가", "노련한 용병", "숙련된 기사", 
+        "정예 아카데미 스페셜리스트", "영웅 챔피언", "전설의 마스터", 
+        "신화의 오버로드", "차원 초월자", "우주 소멸자", "🌌 차원 절대신"
+    ]
+    idx = min((lvl - 1) // 5, len(titles) - 1)
+    return titles[idx]
 
 def get_weapon_info(lvl):
-    names = ["녹슨 단검", "강철 장검", "룬 각인 검", "엘프의 명검", "영웅의 성검", "용살자의 대검", "차원 파괴검", "🌌 신멸의 절망검"]
-    idx = min(lvl // 7, len(names) - 1)
+    names = [
+        "녹슨 단검", "강철 장검", "룬 각인 검", "엘프의 명검", 
+        "화염 블레이드", "영웅의 성검", "용살자의 대검", "플라즈마 레이피어", 
+        "차원 파괴검", "아포칼립스 낫", "갤럭시 세이버", "🌌 신멸의 절망검"
+    ]
+    idx = min(lvl // 4, len(names) - 1)
     return {"name": names[idx], "svg": WEAPON_SVGS[idx]}
 
 def get_monster_info(step):
