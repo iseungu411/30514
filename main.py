@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 import random
 import time
 
-st.set_page_config(page_title="NEON RPG: OVERDRIVE 30", page_icon="⚔️", layout="centered")
+st.set_page_config(page_title="NEON RPG: OVERDRIVE 50", page_icon="⚔️", layout="centered")
 
 # --- 🎨 Cyberpunk & High-End Neon Design CSS ---
 st.markdown("""
@@ -92,24 +92,24 @@ def safe_rerun():
     if hasattr(st, "rerun"): st.rerun()
     elif hasattr(st, "experimental_rerun"): st.experimental_rerun()
 
-# --- ⚔️ 디테일이 업그레이드된 진화 검 SVG 라이브러리 ---
+# --- ⚔️ 진화 검 SVG 라이브러리 ---
 WEAPON_SVGS = [
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><rect x="47" y="25" width="6" height="45" fill="#8D6E63"/><polygon points="45,25 50,15 55,25" fill="#A1887F"/><rect x="35" y="70" width="30" height="6" fill="#5D4037"/><circle cx="50" cy="80" r="4" fill="#3E2723"/></svg>''',
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 46 15 L 50 5 L 54 15 L 53 65 L 47 65 Z" fill="#CFD8DC" stroke="#37474F" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="60" stroke="#90A4AE" stroke-width="1.5"/><rect x="33" y="65" width="34" height="6" fill="#455A64"/></svg>''',
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 45 15 L 50 2 L 55 15 L 53 65 L 47 65 Z" fill="#9C27B0" stroke="#00f0ff" stroke-width="2"/><circle cx="50" cy="35" r="5" fill="#00f0ff" filter="drop-shadow(0 0 5px #00f0ff)"/><polygon points="30,65 70,65 50,72" fill="#7B1FA2"/></svg>''',
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 44 10 L 50 0 L 56 10 L 54 65 L 46 65 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="2"/><path d="M 40 65 Q 50 55 60 65 L 50 75 Z" fill="#81C784"/><circle cx="50" cy="25" r="4" fill="#A5D6A7"/></svg>''',
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 44 12 L 50 0 L 56 12 L 54 65 L 46 65 Z" fill="#FFF9C4" stroke="#FFD700" stroke-width="2.5"/><polygon points="25,65 75,65 50,75" fill="#FFD700"/><circle cx="50" cy="30" r="6" fill="#FFD700" filter="drop-shadow(0 0 8px #FFD700)"/></svg>''',
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 42 8 L 50 -5 L 58 8 L 55 65 L 45 65 Z" fill="#FF3D00" stroke="#BF360C" stroke-width="2.5" filter="drop-shadow(0 0 6px #FF3D00)"/><path d="M 30 65 Q 50 50 70 65 L 50 80 Z" fill="#DD2C00"/></svg>''',
-    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 43 5 L 50 -10 L 57 5 L 54 62 L 46 62 Z" fill="#00f0ff" filter="drop-shadow(0 0 12px #00f0ff)"/><polygon points="20,62 80,62 50,75" fill="#ff007f" filter="drop-shadow(0 0 8px #ff007f)"/><circle cx="50" cy="30" r="7" fill="#fff"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><rect x="47" y="25" width="6" height="45" fill="#8D6E63"/><polygon points="45,25 50,15 55,25" fill="#A1887F"/><rect x="35" y="70" width="30" height="6" fill="#5D4037"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 46 15 L 50 5 L 54 15 L 53 65 L 47 65 Z" fill="#CFD8DC" stroke="#37474F" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="60" stroke="#90A4AE" stroke-width="1.5"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 45 15 L 50 2 L 55 15 L 53 65 L 47 65 Z" fill="#9C27B0" stroke="#00f0ff" stroke-width="2"/><circle cx="50" cy="35" r="5" fill="#00f0ff" filter="drop-shadow(0 0 5px #00f0ff)"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 44 10 L 50 0 L 56 10 L 54 65 L 46 65 Z" fill="#4CAF50" stroke="#1B5E20" stroke-width="2"/><circle cx="50" cy="25" r="4" fill="#A5D6A7"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 44 12 L 50 0 L 56 12 L 54 65 L 46 65 Z" fill="#FFF9C4" stroke="#FFD700" stroke-width="2.5"/><polygon points="25,65 75,65 50,75" fill="#FFD700"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 42 8 L 50 -5 L 58 8 L 55 65 L 45 65 Z" fill="#FF3D00" stroke="#BF360C" stroke-width="2.5" filter="drop-shadow(0 0 6px #FF3D00)"/></svg>''',
+    '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 43 5 L 50 -10 L 57 5 L 54 62 L 46 62 Z" fill="#00f0ff" filter="drop-shadow(0 0 12px #00f0ff)"/></svg>''',
     '''<svg width="110" height="110" viewBox="0 0 100 100"><path d="M 40 -8 L 50 -20 L 60 -8 L 56 65 L 44 65 Z" fill="#FF007F" filter="drop-shadow(0 0 18px #FF007F)"/><polygon points="15,65 85,65 50,82" fill="#FFD700" filter="drop-shadow(0 0 10px #FFD700)"/><circle cx="50" cy="20" r="8" fill="#00f0ff" filter="drop-shadow(0 0 12px #00f0ff)"/></svg>'''
 ]
 
 def get_hero_title(lvl):
-    if lvl < 6: return "초보 모험가"
-    elif lvl < 12: return "숙련된 기사"
-    elif lvl < 18: return "영웅 챔피언"
-    elif lvl < 24: return "전설의 마스터"
-    elif lvl < 30: return "신화의 오버로드"
+    if lvl < 10: return "초보 모험가"
+    elif lvl < 20: return "숙련된 기사"
+    elif lvl < 30: return "영웅 챔피언"
+    elif lvl < 40: return "전설의 마스터"
+    elif lvl < 50: return "신화의 오버로드"
     else: return "🌌 차원 절대신"
 
 def get_weapon_info(lvl):
@@ -117,30 +117,31 @@ def get_weapon_info(lvl):
         "녹슨 단검", "강철 장검", "룬 각인 검", "엘프의 명검", 
         "영웅의 성검", "용살자의 대검", "차원 파괴검", "🌌 신멸의 절망검"
     ]
-    idx = min(lvl // 4, len(names) - 1)
+    idx = min(lvl // 7, len(names) - 1)
     return {"name": names[idx], "svg": WEAPON_SVGS[idx]}
 
-# 💥 몬스터 데이터
+# 💥 50단계 보스 극악 난이도 재설계
 def get_monster_info(step):
     prefix = ["말랑", "흉폭한", "저주받은", "심연의", "지옥의", "우주의", "멸망의", "절대"]
     base_names = ["슬라임", "고블린", "골렘", "미노타우로스", "드래곤", "크라켄", "요르문간드", "파괴자"]
     
-    if step == 30:
+    if step == 50:
+        # 용사 50렙 + 검 50렙 총 스탯(HP: 18,000 / ATK: 300,000)을 보유해야 겨우 잡도록 밸런싱
         return {
             "name": "👑 [FINAL BOSS] 종말의 창조신 파괴자",
-            "hp": 250000,
-            "atk": 3800,
+            "hp": 2200000,
+            "atk": 2800,
             "skill": "⚡ 우주 멸망 소멸 포격",
-            "reward": 300000
+            "reward": 1000000
         }
     
-    p_idx = min((step - 1) // 4, len(prefix) - 1)
-    b_idx = min((step - 1) // 4, len(base_names) - 1)
+    p_idx = min((step - 1) // 7, len(prefix) - 1)
+    b_idx = min((step - 1) // 7, len(base_names) - 1)
     
     name = f"{prefix[p_idx]} {base_names[b_idx]} (Lv.{step})"
-    hp = int(250 * (1.35 ** step))
-    atk = int(25 * (1.28 ** step))
-    reward = int(350 * (1.35 ** step))
+    hp = int(300 * (1.20 ** step))
+    atk = int(20 * (1.11 ** step))
+    reward = int(400 * (1.20 ** step))
     
     return {"name": name, "hp": hp, "atk": atk, "skill": "💥 강격 파동", "reward": reward}
 
@@ -150,28 +151,27 @@ if "gold" not in st.session_state:
     st.session_state.hero_level = 1
     st.session_state.gold = 10000
     st.session_state.weapon_lvl = 0
-    st.session_state.log = ["✨ 30단계 오버로드 모험이 시작되었습니다!"]
+    st.session_state.log = ["✨ 50단계 신화 모험이 시작되었습니다!"]
 
-def get_hero_atk(): return st.session_state.hero_level * 100
+def get_hero_atk(): return st.session_state.hero_level * 1000
 
-# 💥 검 공격력 지수적 증가 (30단계 도달 시 최종보스 압도 가능)
+# 검 공격력 지수 증가 (50단계 도달 시 250,000 ATK 달성)
 def get_weapon_atk(): 
     if st.session_state.weapon_lvl == 0: return 0
-    return int(150 * (1.26 ** st.session_state.weapon_lvl))
+    return int(800 * (1.123 ** st.session_state.weapon_lvl))
 
 def get_total_atk(): return get_hero_atk() + get_weapon_atk()
-def get_max_hp(): return 500 + (st.session_state.hero_level * 250)
+def get_max_hp(): return 800 + (st.session_state.hero_level * 344)
 
-def get_w_cost(): return int(350 * (1.25 ** st.session_state.weapon_lvl))
-def get_h_cost(): return st.session_state.hero_level * 400
+def get_w_cost(): return int(350 * (1.18 ** st.session_state.weapon_lvl))
+def get_h_cost(): return int(400 * (1.15 ** st.session_state.hero_level))
 
-# 📉 검 강화 확률 축소 (난이도 상승)
 def get_w_rate(): 
-    return max(15.0, 100.0 - (st.session_state.weapon_lvl * 2.8))
+    return max(10.0, 100.0 - (st.session_state.weapon_lvl * 1.8))
 
 def enhance_weapon():
-    if st.session_state.weapon_lvl >= 30:
-        st.toast("👑 검이 이미 최고 단계(30단계)에 도달했습니다!", icon="⭐")
+    if st.session_state.weapon_lvl >= 50:
+        st.toast("👑 검이 이미 최고 단계(50단계)에 도달했습니다!", icon="⭐")
         return
     if st.session_state.gold < get_w_cost():
         st.toast("⚠️ 골드가 부족합니다!", icon="💰")
@@ -185,8 +185,8 @@ def enhance_weapon():
     safe_rerun()
 
 def enhance_hero():
-    if st.session_state.hero_level >= 30:
-        st.toast("👑 용사가 이미 최고 레벨(30단계)에 도달했습니다!", icon="⭐")
+    if st.session_state.hero_level >= 50:
+        st.toast("👑 용사가 이미 최고 레벨(50단계)에 도달했습니다!", icon="⭐")
         return
     if st.session_state.gold < get_h_cost():
         st.toast("⚠️ 골드가 부족합니다!", icon="💰")
@@ -198,7 +198,7 @@ def enhance_hero():
 
 # --- 🎨 화려해진 2D Canvas 렌더링 엔진 ---
 def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, damage, is_hero_turn, hero_level, render_id):
-    is_final_boss = (monster_step == 30)
+    is_final_boss = (monster_step == 50)
     
     html_code = f"""
     <div style="text-align: center;">
@@ -222,16 +222,14 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
         function animate() {{
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 🌌 필살기 연출 시 화면 흔들림 효과
             if (isUlt && isHeroTurn && frame >= 10 && frame <= 20) {{
-                let shakeX = (Math.random() - 0.5) * 12;
-                let shakeY = (Math.random() - 0.5) * 12;
+                let shakeX = (Math.random() - 0.5) * 14;
+                let shakeY = (Math.random() - 0.5) * 14;
                 ctx.setTransform(1, 0, 0, 1, shakeX, shakeY);
             }} else {{
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
             }}
 
-            // 배경 그리드
             ctx.strokeStyle = isFinalBoss ? 'rgba(255, 0, 127, 0.25)' : 'rgba(0, 240, 255, 0.12)';
             ctx.lineWidth = 1;
             for(let x=0; x<canvas.width; x+=30) {{ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }}
@@ -251,31 +249,39 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 else mX += (frame - 20) * 18;
             }}
             
-            // 🦸 화려한 용사 아바타 (오라 효과 적용)
+            // 🦸 초화려 용사 비주얼 (날개 + 왕관 + 회전 차원 아우라)
             ctx.save();
-            ctx.shadowColor = '#00f0ff';
-            ctx.shadowBlur = 20 + Math.sin(frame*0.2)*8;
-            ctx.fillStyle = '#00f0ff';
-            ctx.beginPath(); ctx.arc(hX, 115, 24, 0, Math.PI*2); ctx.fill();
             
-            // 투구 및 왕관 회화
-            ctx.fillStyle = '#ffd700';
+            // 1. 차원 날개 연출
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+            ctx.shadowColor = '#00f0ff';
+            ctx.shadowBlur = 15;
             ctx.beginPath();
-            ctx.moveTo(hX - 16, 100); ctx.lineTo(hX - 8, 85); ctx.lineTo(hX, 95); ctx.lineTo(hX + 8, 85); ctx.lineTo(hX + 16, 100);
+            ctx.moveTo(hX, 115); ctx.lineTo(hX - 35, 80); ctx.lineTo(hX - 20, 115);
+            ctx.moveTo(hX, 115); ctx.lineTo(hX + 35, 80); ctx.lineTo(hX + 20, 115);
+            ctx.fill();
+
+            // 2. 맥동하는 코어 아우라
+            ctx.shadowBlur = 25 + Math.sin(frame*0.2)*10;
+            ctx.fillStyle = '#00f0ff';
+            ctx.beginPath(); ctx.arc(hX, 115, 25, 0, Math.PI*2); ctx.fill();
+            
+            // 3. 황금 왕관
+            ctx.fillStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.moveTo(hX - 18, 98); ctx.lineTo(hX - 9, 82); ctx.lineTo(hX, 93); ctx.lineTo(hX + 9, 82); ctx.lineTo(hX + 18, 98);
             ctx.closePath(); ctx.fill();
             
             ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{hero_name}', hX - 25, 160);
             ctx.restore();
             
-            // 👹 화려한 몬스터 아바타
+            // 👹 몬스터 비주얼
             ctx.save();
             if (isFinalBoss) {{
                 let size = 52 + Math.sin(frame*0.2)*8;
-                // 외부 악마 오라
                 ctx.strokeStyle = '#ff0055'; ctx.lineWidth = 5; ctx.shadowColor = '#ff0055'; ctx.shadowBlur = 40;
                 ctx.beginPath(); ctx.arc(mX, 115, size, 0, Math.PI*2); ctx.stroke();
                 
-                // 역삼각형 마법진 연출
                 ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2;
                 ctx.beginPath();
                 for(let i=0; i<3; i++) {{
@@ -286,24 +292,22 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 }}
                 ctx.closePath(); ctx.stroke();
                 
-                // 중심 본체
                 ctx.fillStyle = '#110022'; ctx.fillRect(mX - 30, 115 - 30, 60, 60);
                 ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(mX, 115, 15, 0, Math.PI*2); ctx.fill();
             }} else {{
-                ctx.fillStyle = mStep >= 15 ? '#ff007f' : '#a100ff';
+                ctx.fillStyle = mStep >= 25 ? '#ff007f' : '#a100ff';
                 ctx.shadowColor = '#a100ff'; ctx.shadowBlur = 15;
-                let boxSize = 38 + Math.min(mStep, 30) * 0.5;
+                let boxSize = 38 + Math.min(mStep, 50) * 0.4;
                 ctx.fillRect(mX - boxSize/2, 115 - boxSize/2, boxSize, boxSize);
             }}
             ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Orbitron'; ctx.fillText('{monster_name}', mX - 40, 165);
             ctx.restore();
             
-            // ⚔️ 화려한 이펙트 연출
+            // ⚔️ 이펙트 연출
             if (strike) {{
                 ctx.save();
                 if (isHeroTurn) {{
                     if (isUlt) {{
-                        // 필살 십자 참격 + 폭발 효과
                         ctx.strokeStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 35; ctx.lineWidth = 10;
                         ctx.beginPath(); ctx.moveTo(mX - 60, 55); ctx.lineTo(mX + 60, 175); ctx.stroke();
                         ctx.beginPath(); ctx.moveTo(mX + 60, 55); ctx.lineTo(mX - 60, 175); ctx.stroke();
@@ -311,7 +315,6 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                         ctx.strokeStyle = '#ff007f'; ctx.lineWidth = 6;
                         ctx.beginPath(); ctx.moveTo(mX - 70, 115); ctx.lineTo(mX + 70, 115); ctx.stroke();
                         
-                        // 충격파 원
                         ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 3;
                         ctx.beginPath(); ctx.arc(mX, 115, 45 + (frame-10)*3, 0, Math.PI*2); ctx.stroke();
                     }} else {{
@@ -331,7 +334,7 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
                 ctx.fillStyle = isUlt ? '#ffd700' : '#ffff00';
                 ctx.font = '900 28px Orbitron';
                 let txtX = isHeroTurn ? mX : hX;
-                ctx.fillText('-{damage:,}', txtX - 30, 45);
+                ctx.fillText('-' + damage.toLocaleString(), txtX - 30, 45);
                 ctx.restore();
             }}
             
@@ -345,13 +348,13 @@ def render_canvas_battle(hero_name, monster_name, monster_step, is_ultimate, dam
     return html_code
 
 # --- 🖥️ UI Layout ---
-st.markdown("<h1 class='game-title'>⚔️ OVERDRIVE BATTLE 30 ⚔️</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='game-title'>⚔️ OVERDRIVE BATTLE 50 ⚔️</h1>", unsafe_allow_html=True)
 
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("💰 골드", f"{st.session_state.gold:,} G")
 m2.metric("⚡ 총 공격력", f"{get_total_atk():,} ATK")
-m3.metric("🦸 용사 단계", f"Lv.{st.session_state.hero_level} / 30")
-m4.metric("🛡️ 검 단계", f"+{st.session_state.weapon_lvl} / 30")
+m3.metric("🦸 용사 단계", f"Lv.{st.session_state.hero_level} / 50")
+m4.metric("🛡️ 검 단계", f"+{st.session_state.weapon_lvl} / 50")
 
 st.markdown("---")
 
@@ -362,7 +365,12 @@ with col_hero:
     st.markdown(f"""
     <div class='profile-card'>
         <div class='svg-container'>
-            <svg width="90" height="90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#00f0ff" stroke-width="3"/><path d="M 20 25 L 80 25 L 75 85 L 50 100 L 25 85 Z" fill="#1A237E" stroke="#00f0ff" stroke-width="3"/><polygon points="50,15 60,35 40,35" fill="#ffd700" filter="drop-shadow(0 0 5px #ffd700)"/></svg>
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <path d="M 15 50 Q 0 20 30 30 Z" fill="rgba(0,240,255,0.5)"/>
+                <path d="M 85 50 Q 100 20 70 30 Z" fill="rgba(0,240,255,0.5)"/>
+                <circle cx="50" cy="50" r="30" fill="#00f0ff" filter="drop-shadow(0 0 12px #00f0ff)"/>
+                <polygon points="30,35 40,15 50,28 60,15 70,35" fill="#ffd700" filter="drop-shadow(0 0 8px #ffd700)"/>
+            </svg>
         </div>
         <b>[{get_hero_title(st.session_state.hero_level)}] {st.session_state.hero_name}</b><br>
         HP: {get_max_hp():,} | ATK: {get_hero_atk():,}
@@ -387,11 +395,11 @@ with col_weapon:
 st.markdown("---")
 
 # --- 👹 전투 아레나 ---
-st.subheader("⚔️ 30단계 실시간 격투 아레나")
+st.subheader("⚔️ 50단계 실시간 격투 아레나")
 
 skip_battle = st.checkbox("⏩ 전투 연출 SKIP (즉시 계산)", value=False)
 
-m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 30단계)", 1, 30, st.session_state.hero_level)
+m_step = st.slider("🎯 사냥할 괴물 단계 선택 (1 ~ 50단계)", 1, 50, st.session_state.hero_level)
 monster = get_monster_info(m_step)
 
 st.markdown(f"**상대 Monster**: <span style='color:#ff007f; font-weight:bold;'>{monster['name']}</span> | HP: {monster['hp']:,} | ATK: {monster['atk']:,}", unsafe_allow_html=True)
